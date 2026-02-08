@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useGetCallerUserProfile } from '../hooks/useCurrentUserProfile';
+import { hexToOKLCH } from '../utils/color';
 
 interface ThemeContextType {
   isDark: boolean;
@@ -31,10 +32,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [isDark]);
 
   useEffect(() => {
-    // Convert hex to OKLCH and apply as CSS variable
-    // For simplicity, we'll just use the hex color directly on primary
-    document.documentElement.style.setProperty('--theme-primary', themeColor);
-  }, [themeColor]);
+    // Convert hex to OKLCH and apply to CSS variables
+    const oklch = hexToOKLCH(themeColor);
+    
+    // Apply to primary and ring tokens for both light and dark modes
+    document.documentElement.style.setProperty('--primary', oklch);
+    document.documentElement.style.setProperty('--ring', oklch);
+    document.documentElement.style.setProperty('--chart-5', oklch);
+    
+    // Adjust lightness for dark mode primary if currently in dark mode
+    if (isDark) {
+      // Increase lightness slightly for better visibility in dark mode
+      const parts = oklch.split(' ');
+      const L = parseFloat(parts[0]);
+      const adjustedL = Math.min(0.75, L + 0.06);
+      const adjustedOKLCH = `${adjustedL.toFixed(2)} ${parts[1]} ${parts[2]}`;
+      document.documentElement.style.setProperty('--primary', adjustedOKLCH);
+      document.documentElement.style.setProperty('--ring', adjustedOKLCH);
+    }
+  }, [themeColor, isDark]);
 
   const toggleTheme = () => {
     setIsDark((prev) => !prev);

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function SettingsPage() {
   const { data: userProfile, isLoading } = useGetCallerUserProfile();
@@ -15,10 +15,20 @@ export default function SettingsPage() {
   const { isDark, toggleTheme, themeColor, setThemeColor } = useTheme();
   const [localColor, setLocalColor] = useState(themeColor);
 
+  // Sync local color with theme context when it loads
+  useEffect(() => {
+    setLocalColor(themeColor);
+  }, [themeColor]);
+
+  // Live preview: update theme color as user changes it
+  const handleColorChange = (newColor: string) => {
+    setLocalColor(newColor);
+    setThemeColor(newColor);
+  };
+
   const handleSaveTheme = () => {
     if (!userProfile) return;
 
-    setThemeColor(localColor);
     updateProfile(
       {
         username: userProfile.username,
@@ -84,24 +94,40 @@ export default function SettingsPage() {
 
           <div className="space-y-2">
             <Label>Theme Color</Label>
+            <p className="text-sm text-muted-foreground mb-2">
+              Choose your primary color (changes apply immediately)
+            </p>
             <div className="flex gap-2">
               <Input
                 type="color"
                 value={localColor}
-                onChange={(e) => setLocalColor(e.target.value)}
+                onChange={(e) => handleColorChange(e.target.value)}
                 className="w-20 h-10"
               />
               <Input
                 type="text"
                 value={localColor}
-                onChange={(e) => setLocalColor(e.target.value)}
+                onChange={(e) => handleColorChange(e.target.value)}
                 placeholder="#ea580c"
               />
             </div>
-            <Button onClick={handleSaveTheme} disabled={isPending}>
+            <Button onClick={handleSaveTheme} disabled={isPending} className="mt-2">
               {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Save Theme
             </Button>
+          </div>
+
+          {/* Preview section */}
+          <div className="space-y-2 pt-4 border-t">
+            <Label>Preview</Label>
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="default">Primary Button</Button>
+              <Button variant="outline">Outline Button</Button>
+              <Button variant="secondary">Secondary Button</Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Primary buttons and focus rings will use your selected color
+            </p>
           </div>
         </div>
       </Card>

@@ -1,9 +1,10 @@
 import { ReactNode } from 'react';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
+import { useGuestSession } from '../../hooks/useGuestSession';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGetCallerUserProfile } from '../../hooks/useCurrentUserProfile';
-import { MessageSquare, Users, User, Settings, LogOut } from 'lucide-react';
+import { MessageSquare, Users, User, Settings, LogOut, DoorOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Avatar from '../common/Avatar';
+import GuestBadge from './GuestBadge';
 
 interface AppShellProps {
   children: ReactNode;
@@ -21,20 +23,28 @@ interface AppShellProps {
 export default function AppShell({ children }: AppShellProps) {
   const navigate = useNavigate();
   const routerState = useRouterState();
-  const { clear } = useInternetIdentity();
+  const { clear, identity } = useInternetIdentity();
+  const { guestSession, clearGuestSession } = useGuestSession();
   const queryClient = useQueryClient();
   const { data: userProfile } = useGetCallerUserProfile();
 
   const currentPath = routerState.location.pathname;
+  const isGuest = !!guestSession && !identity;
 
   const handleLogout = async () => {
     await clear();
+    clearGuestSession();
     queryClient.clear();
+    navigate({ to: '/' });
   };
+
+  const displayName = isGuest ? guestSession.displayName : (userProfile?.displayName || 'User');
+  const username = isGuest ? guestSession.username : (userProfile?.username || 'username');
 
   const navItems = [
     { path: '/', icon: MessageSquare, label: 'Chats' },
     { path: '/friends', icon: Users, label: 'Friends' },
+    { path: '/rooms', icon: DoorOpen, label: 'Rooms' },
   ];
 
   return (
@@ -50,24 +60,31 @@ export default function AppShell({ children }: AppShellProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar user={userProfile} size="sm" />
+                <Avatar user={isGuest ? null : userProfile} size="sm" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{userProfile?.displayName || 'User'}</p>
-                <p className="text-xs text-muted-foreground">@{userProfile?.username || 'username'}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{displayName}</p>
+                  {isGuest && <GuestBadge />}
+                </div>
+                <p className="text-xs text-muted-foreground">@{username}</p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate({ to: '/profile' })}>
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate({ to: '/settings' })}>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              {!isGuest && (
+                <>
+                  <DropdownMenuItem onClick={() => navigate({ to: '/profile' })}>
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate({ to: '/settings' })}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
@@ -85,7 +102,7 @@ export default function AppShell({ children }: AppShellProps) {
         <div className="container flex h-16 items-center justify-around px-4">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = currentPath === item.path;
+            const isActive = currentPath === item.path || (item.path === '/rooms' && currentPath.startsWith('/rooms'));
             return (
               <Button
                 key={item.path}

@@ -25,6 +25,13 @@ export const UserRole = IDL.Variant({
   'guest' : IDL.Null,
 });
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const Room = IDL.Record({
+  'id' : IDL.Text,
+  'creator' : IDL.Principal,
+  'participants' : IDL.Vec(IDL.Text),
+  'joinCode' : IDL.Text,
+  'isGroup' : IDL.Bool,
+});
 export const UserProfile = IDL.Record({
   'principal' : IDL.Principal,
   'username' : IDL.Text,
@@ -37,6 +44,11 @@ export const Friend = IDL.Record({
   'principal' : IDL.Principal,
   'isBestFriend' : IDL.Bool,
 });
+export const GuestProfile = IDL.Record({
+  'displayName' : IDL.Text,
+  'profilePicture' : IDL.Opt(ExternalBlob),
+  'guestId' : IDL.Text,
+});
 export const Time = IDL.Int;
 export const Message = IDL.Record({
   'id' : IDL.Nat,
@@ -46,6 +58,22 @@ export const Message = IDL.Record({
   'timestamp' : Time,
   'replyTo' : IDL.Opt(IDL.Nat),
   'receiver' : IDL.Principal,
+});
+export const RoomMessage = IDL.Record({
+  'id' : IDL.Nat,
+  'content' : IDL.Text,
+  'video' : IDL.Opt(ExternalBlob),
+  'sender' : IDL.Text,
+  'timestamp' : Time,
+  'replyTo' : IDL.Opt(IDL.Nat),
+  'roomId' : IDL.Text,
+});
+export const SystemMessage = IDL.Record({
+  'id' : IDL.Nat,
+  'content' : IDL.Text,
+  'messageType' : IDL.Text,
+  'timestamp' : Time,
+  'roomId' : IDL.Text,
 });
 export const SearchResult = IDL.Record({
   'principal' : IDL.Principal,
@@ -84,26 +112,49 @@ export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addFriend' : IDL.Func([IDL.Principal], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'createOrUpdateGuestProfile' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Opt(ExternalBlob)],
+      [],
+      [],
+    ),
   'createOrUpdateProfile' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
       [],
       [],
     ),
+  'createRoom' : IDL.Func([IDL.Text, IDL.Bool], [IDL.Text], []),
+  'getAllRooms' : IDL.Func([IDL.Opt(IDL.Text)], [IDL.Vec(Room)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getFriendsList' : IDL.Func([], [IDL.Vec(Friend)], ['query']),
+  'getGuestProfile' : IDL.Func([IDL.Text], [IDL.Opt(GuestProfile)], ['query']),
   'getMessagesWithUser' : IDL.Func(
       [IDL.Principal],
       [IDL.Vec(Message)],
       ['query'],
     ),
   'getProfile' : IDL.Func([IDL.Principal], [IDL.Opt(UserProfile)], ['query']),
+  'getRoom' : IDL.Func([IDL.Text], [Room], ['query']),
+  'getRoomMessages' : IDL.Func(
+      [IDL.Text, IDL.Opt(Time)],
+      [IDL.Vec(RoomMessage)],
+      ['query'],
+    ),
+  'getRoomParticipants' : IDL.Func([IDL.Text], [IDL.Vec(IDL.Text)], ['query']),
+  'getSystemMessages' : IDL.Func(
+      [IDL.Text, IDL.Opt(Time)],
+      [IDL.Vec(SystemMessage)],
+      ['query'],
+    ),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'joinRoom' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'joinRoomWithCode' : IDL.Func([IDL.Text, IDL.Text], [IDL.Text], []),
+  'leaveRoom' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'removeFriend' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'searchUsers' : IDL.Func([IDL.Text], [IDL.Vec(SearchResult)], ['query']),
@@ -112,6 +163,13 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
+  'sendRoomMessage' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Opt(IDL.Nat), IDL.Opt(ExternalBlob)],
+      [],
+      [],
+    ),
+  'setRoomParticipants' : IDL.Func([IDL.Text, IDL.Vec(IDL.Text)], [], []),
+  'setSystemMessage' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'toggleBestFriend' : IDL.Func([IDL.Principal], [], []),
   'updateProfilePicture' : IDL.Func([ExternalBlob], [], []),
 });
@@ -136,6 +194,13 @@ export const idlFactory = ({ IDL }) => {
     'guest' : IDL.Null,
   });
   const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const Room = IDL.Record({
+    'id' : IDL.Text,
+    'creator' : IDL.Principal,
+    'participants' : IDL.Vec(IDL.Text),
+    'joinCode' : IDL.Text,
+    'isGroup' : IDL.Bool,
+  });
   const UserProfile = IDL.Record({
     'principal' : IDL.Principal,
     'username' : IDL.Text,
@@ -148,6 +213,11 @@ export const idlFactory = ({ IDL }) => {
     'principal' : IDL.Principal,
     'isBestFriend' : IDL.Bool,
   });
+  const GuestProfile = IDL.Record({
+    'displayName' : IDL.Text,
+    'profilePicture' : IDL.Opt(ExternalBlob),
+    'guestId' : IDL.Text,
+  });
   const Time = IDL.Int;
   const Message = IDL.Record({
     'id' : IDL.Nat,
@@ -157,6 +227,22 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : Time,
     'replyTo' : IDL.Opt(IDL.Nat),
     'receiver' : IDL.Principal,
+  });
+  const RoomMessage = IDL.Record({
+    'id' : IDL.Nat,
+    'content' : IDL.Text,
+    'video' : IDL.Opt(ExternalBlob),
+    'sender' : IDL.Text,
+    'timestamp' : Time,
+    'replyTo' : IDL.Opt(IDL.Nat),
+    'roomId' : IDL.Text,
+  });
+  const SystemMessage = IDL.Record({
+    'id' : IDL.Nat,
+    'content' : IDL.Text,
+    'messageType' : IDL.Text,
+    'timestamp' : Time,
+    'roomId' : IDL.Text,
   });
   const SearchResult = IDL.Record({
     'principal' : IDL.Principal,
@@ -195,26 +281,57 @@ export const idlFactory = ({ IDL }) => {
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addFriend' : IDL.Func([IDL.Principal], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'createOrUpdateGuestProfile' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Opt(ExternalBlob)],
+        [],
+        [],
+      ),
     'createOrUpdateProfile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
         [],
         [],
       ),
+    'createRoom' : IDL.Func([IDL.Text, IDL.Bool], [IDL.Text], []),
+    'getAllRooms' : IDL.Func([IDL.Opt(IDL.Text)], [IDL.Vec(Room)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getFriendsList' : IDL.Func([], [IDL.Vec(Friend)], ['query']),
+    'getGuestProfile' : IDL.Func(
+        [IDL.Text],
+        [IDL.Opt(GuestProfile)],
+        ['query'],
+      ),
     'getMessagesWithUser' : IDL.Func(
         [IDL.Principal],
         [IDL.Vec(Message)],
         ['query'],
       ),
     'getProfile' : IDL.Func([IDL.Principal], [IDL.Opt(UserProfile)], ['query']),
+    'getRoom' : IDL.Func([IDL.Text], [Room], ['query']),
+    'getRoomMessages' : IDL.Func(
+        [IDL.Text, IDL.Opt(Time)],
+        [IDL.Vec(RoomMessage)],
+        ['query'],
+      ),
+    'getRoomParticipants' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(IDL.Text)],
+        ['query'],
+      ),
+    'getSystemMessages' : IDL.Func(
+        [IDL.Text, IDL.Opt(Time)],
+        [IDL.Vec(SystemMessage)],
+        ['query'],
+      ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'joinRoom' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'joinRoomWithCode' : IDL.Func([IDL.Text, IDL.Text], [IDL.Text], []),
+    'leaveRoom' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'removeFriend' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'searchUsers' : IDL.Func([IDL.Text], [IDL.Vec(SearchResult)], ['query']),
@@ -223,6 +340,13 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
+    'sendRoomMessage' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Opt(IDL.Nat), IDL.Opt(ExternalBlob)],
+        [],
+        [],
+      ),
+    'setRoomParticipants' : IDL.Func([IDL.Text, IDL.Vec(IDL.Text)], [], []),
+    'setSystemMessage' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'toggleBestFriend' : IDL.Func([IDL.Principal], [], []),
     'updateProfilePicture' : IDL.Func([ExternalBlob], [], []),
   });

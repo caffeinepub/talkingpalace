@@ -1,70 +1,131 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-08T15:17:17.866Z",
+  "generatedAt": "2026-02-08T22:08:10.262Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 2,
+    "total": 6,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-19",
-        "summary": "Remove the entire call feature from the backend Motoko canister, including all call-related types, state, and public methods, so the canister interface no longer exposes any call APIs.",
+        "id": "REQ-24",
+        "summary": "Add a guest-mode alternative to Internet Identity sign-in where a user can enter a username and display name without using Internet Identity, and then access the app as a guest without being blocked by the existing authentication gate.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useGuestSession.ts",
+          "frontend/src/pages/SignInPage.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppShell.tsx",
+          "frontend/src/components/layout/GuestBadge.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useGuestSession.ts",
+          "frontend/src/pages/SignInPage.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppShell.tsx",
+          "frontend/src/components/layout/GuestBadge.tsx"
+        ]
+      },
+      {
+        "id": "REQ-25",
+        "summary": "Implement backend support for guest identities (not tied to the caller Principal) so guest users can have a stable in-app identity for room participation and messaging, without changing or removing existing Internet Identity-based user/profile behavior.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-20",
-        "summary": "Remove the entire call feature from the frontend UI and data layer, including the Calls page, the /calls route, call-related React Query hooks, and any navigation entries or icons that link to calls.",
+        "id": "REQ-26",
+        "summary": "Add a new Rooms feature (separate from existing 1:1 chats): users can create a room that generates a join code, and other users can join a room using that code.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/CallsPage.tsx",
+          "frontend/src/pages/RoomsPage.tsx",
+          "frontend/src/hooks/useRooms.ts",
+          "frontend/src/utils/rooms.ts",
           "frontend/src/App.tsx",
-          "frontend/src/components/layout/AppShell.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/layout/AppShell.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/CallsPage.tsx",
+          "frontend/src/pages/RoomsPage.tsx",
+          "frontend/src/hooks/useRooms.ts",
+          "frontend/src/utils/rooms.ts",
           "frontend/src/App.tsx",
-          "frontend/src/components/layout/AppShell.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/layout/AppShell.tsx"
         ]
       },
       {
-        "id": "REQ-21",
-        "summary": "Rename the app to “MessageCenter” in user-facing branding locations (e.g., header title and browser tab title) so the UI consistently shows the new app name.",
+        "id": "REQ-27",
+        "summary": "Implement room messaging where all room participants can post messages, and messages update via periodic polling (no WebSockets).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/RoomChatPage.tsx",
+          "frontend/src/components/rooms/RoomMessageItem.tsx",
+          "frontend/src/hooks/useRoomMessagesPolling.ts",
+          "frontend/src/hooks/useParticipantIdentity.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/RoomChatPage.tsx",
+          "frontend/src/components/rooms/RoomMessageItem.tsx",
+          "frontend/src/hooks/useRoomMessagesPolling.ts",
+          "frontend/src/hooks/useParticipantIdentity.ts"
+        ]
+      },
+      {
+        "id": "REQ-28",
+        "summary": "Enforce a maximum of 50 participants per room, preventing additional joins beyond the limit and providing a clear English error message when the room is full.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/RoomsPage.tsx",
+          "frontend/src/hooks/useRooms.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/RoomsPage.tsx",
+          "frontend/src/hooks/useRooms.ts"
+        ]
+      },
+      {
+        "id": "REQ-29",
+        "summary": "Add Rooms navigation to the app shell so users can access Rooms alongside existing screens, without modifying immutable hook files.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/components/layout/AppShell.tsx",
-          "frontend/index.html"
+          "frontend/src/App.tsx",
+          "frontend/src/pages/RoomsPage.tsx",
+          "frontend/src/pages/RoomChatPage.tsx"
         ],
         "matchedFiles": [
           "frontend/src/components/layout/AppShell.tsx",
-          "frontend/index.html"
+          "frontend/src/App.tsx",
+          "frontend/src/pages/RoomsPage.tsx",
+          "frontend/src/pages/RoomChatPage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/index.html",
     "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
     "frontend/src/components/layout/AppShell.tsx",
+    "frontend/src/components/layout/GuestBadge.tsx",
+    "frontend/src/components/rooms/RoomMessageItem.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/CallsPage.tsx",
+    "frontend/src/hooks/useGuestSession.ts",
+    "frontend/src/hooks/useParticipantIdentity.ts",
+    "frontend/src/hooks/useRoomMessagesPolling.ts",
+    "frontend/src/hooks/useRooms.ts",
+    "frontend/src/pages/RoomChatPage.tsx",
+    "frontend/src/pages/RoomsPage.tsx",
+    "frontend/src/pages/SignInPage.tsx",
+    "frontend/src/utils/rooms.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,11 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Remove all call-related functionality from the app and rename the app to “MessageCenter”.
+**Goal:** Add an alternative guest sign-in flow alongside Internet Identity, and introduce joinable code-based chat rooms with polling-based message updates and a 50-participant cap.
 
 **Planned changes:**
-- Remove all call-related types, state, and public methods from the backend Motoko canister so no call APIs remain in the canister interface.
-- Remove all call-related UI and data-layer code from the frontend, including the Calls page, /calls route, related React Query hooks, and any navigation entries/icons linking to calls.
-- Update user-facing branding to “MessageCenter”, including the in-app header/title and the browser tab title.
+- Update the sign-in screen to offer both “Sign In with Internet Identity” and “Continue as Guest” with username + display name inputs.
+- Persist a guest session locally so guest users can access the authenticated app shell, and ensure signing out clears both guest and Internet Identity session state.
+- Add backend support for stable guest identities (not based on the anonymous Principal) while preserving existing Internet Identity profile and 1:1 chat behavior.
+- Add a new Rooms section (separate from existing 1:1 chats) with UI to create a room (show join code) and join a room by code (with invalid-code errors).
+- Implement room messaging with periodic polling for updates (no WebSockets), including sender identity, timestamps, and suitable “fetch latest/since” querying.
+- Enforce a maximum of 50 participants per room with consistent backend rejection and clear frontend error messaging when full.
+- Add Rooms navigation entry in the app shell to support: Rooms list → Create/Join → Room chat, without modifying declared immutable frontend paths.
 
-**User-visible outcome:** The app no longer shows or supports any Calls feature, and the UI branding consistently displays “MessageCenter”.
+**User-visible outcome:** Users can sign in either with Internet Identity or as a guest, then create rooms that generate a join code, join rooms by code (up to 50 participants), and chat in rooms where messages refresh automatically via polling.

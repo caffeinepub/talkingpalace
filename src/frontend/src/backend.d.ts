@@ -14,10 +14,6 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
-export interface Friend {
-    principal: Principal;
-    isBestFriend: boolean;
-}
 export interface SearchResult {
     principal: Principal;
     username: string;
@@ -25,6 +21,38 @@ export interface SearchResult {
     profilePicture?: ExternalBlob;
 }
 export type Time = bigint;
+export interface RoomMessage {
+    id: bigint;
+    content: string;
+    video?: ExternalBlob;
+    sender: string;
+    timestamp: Time;
+    replyTo?: bigint;
+    roomId: string;
+}
+export interface Room {
+    id: string;
+    creator: Principal;
+    participants: Array<string>;
+    joinCode: string;
+    isGroup: boolean;
+}
+export interface SystemMessage {
+    id: bigint;
+    content: string;
+    messageType: string;
+    timestamp: Time;
+    roomId: string;
+}
+export interface Friend {
+    principal: Principal;
+    isBestFriend: boolean;
+}
+export interface GuestProfile {
+    displayName: string;
+    profilePicture?: ExternalBlob;
+    guestId: string;
+}
 export interface Message {
     id: bigint;
     content: string;
@@ -50,18 +78,32 @@ export enum UserRole {
 export interface backendInterface {
     addFriend(friend: Principal): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    createOrUpdateGuestProfile(guestId: string, displayName: string, profilePicture: ExternalBlob | null): Promise<void>;
     createOrUpdateProfile(username: string, displayName: string, themeColor: string, darkMode: boolean): Promise<void>;
+    createRoom(joinCode: string, isGroup: boolean): Promise<string>;
+    getAllRooms(filterParticipant: string | null): Promise<Array<Room>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getFriendsList(): Promise<Array<Friend>>;
+    getGuestProfile(guestId: string): Promise<GuestProfile | null>;
     getMessagesWithUser(other: Principal): Promise<Array<Message>>;
     getProfile(user: Principal): Promise<UserProfile | null>;
+    getRoom(roomId: string): Promise<Room>;
+    getRoomMessages(roomId: string, sinceTimestamp: Time | null): Promise<Array<RoomMessage>>;
+    getRoomParticipants(roomId: string): Promise<Array<string>>;
+    getSystemMessages(roomId: string, sinceTimestamp: Time | null): Promise<Array<SystemMessage>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    joinRoom(roomId: string, participantId: string): Promise<void>;
+    joinRoomWithCode(joinCode: string, participantId: string): Promise<string>;
+    leaveRoom(roomId: string, participantId: string): Promise<void>;
     removeFriend(friend: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     searchUsers(term: string): Promise<Array<SearchResult>>;
     sendMessage(receiver: Principal, content: string, replyTo: bigint | null, video: ExternalBlob | null): Promise<void>;
+    sendRoomMessage(roomId: string, content: string, replyTo: bigint | null, video: ExternalBlob | null): Promise<void>;
+    setRoomParticipants(roomId: string, participants: Array<string>): Promise<void>;
+    setSystemMessage(roomId: string, content: string, messageType: string): Promise<void>;
     toggleBestFriend(friend: Principal): Promise<void>;
     updateProfilePicture(picture: ExternalBlob): Promise<void>;
 }

@@ -12,6 +12,11 @@ import type { Principal } from '@icp-sdk/core/principal';
 
 export type ExternalBlob = Uint8Array;
 export interface Friend { 'principal' : Principal, 'isBestFriend' : boolean }
+export interface GuestProfile {
+  'displayName' : string,
+  'profilePicture' : [] | [ExternalBlob],
+  'guestId' : string,
+}
 export interface Message {
   'id' : bigint,
   'content' : string,
@@ -21,11 +26,34 @@ export interface Message {
   'replyTo' : [] | [bigint],
   'receiver' : Principal,
 }
+export interface Room {
+  'id' : string,
+  'creator' : Principal,
+  'participants' : Array<string>,
+  'joinCode' : string,
+  'isGroup' : boolean,
+}
+export interface RoomMessage {
+  'id' : bigint,
+  'content' : string,
+  'video' : [] | [ExternalBlob],
+  'sender' : string,
+  'timestamp' : Time,
+  'replyTo' : [] | [bigint],
+  'roomId' : string,
+}
 export interface SearchResult {
   'principal' : Principal,
   'username' : string,
   'displayName' : string,
   'profilePicture' : [] | [ExternalBlob],
+}
+export interface SystemMessage {
+  'id' : bigint,
+  'content' : string,
+  'messageType' : string,
+  'timestamp' : Time,
+  'roomId' : string,
 }
 export type Time = bigint;
 export interface UserProfile {
@@ -69,17 +97,34 @@ export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addFriend' : ActorMethod<[Principal], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'createOrUpdateGuestProfile' : ActorMethod<
+    [string, string, [] | [ExternalBlob]],
+    undefined
+  >,
   'createOrUpdateProfile' : ActorMethod<
     [string, string, string, boolean],
     undefined
   >,
+  'createRoom' : ActorMethod<[string, boolean], string>,
+  'getAllRooms' : ActorMethod<[[] | [string]], Array<Room>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getFriendsList' : ActorMethod<[], Array<Friend>>,
+  'getGuestProfile' : ActorMethod<[string], [] | [GuestProfile]>,
   'getMessagesWithUser' : ActorMethod<[Principal], Array<Message>>,
   'getProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getRoom' : ActorMethod<[string], Room>,
+  'getRoomMessages' : ActorMethod<[string, [] | [Time]], Array<RoomMessage>>,
+  'getRoomParticipants' : ActorMethod<[string], Array<string>>,
+  'getSystemMessages' : ActorMethod<
+    [string, [] | [Time]],
+    Array<SystemMessage>
+  >,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'joinRoom' : ActorMethod<[string, string], undefined>,
+  'joinRoomWithCode' : ActorMethod<[string, string], string>,
+  'leaveRoom' : ActorMethod<[string, string], undefined>,
   'removeFriend' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'searchUsers' : ActorMethod<[string], Array<SearchResult>>,
@@ -87,6 +132,12 @@ export interface _SERVICE {
     [Principal, string, [] | [bigint], [] | [ExternalBlob]],
     undefined
   >,
+  'sendRoomMessage' : ActorMethod<
+    [string, string, [] | [bigint], [] | [ExternalBlob]],
+    undefined
+  >,
+  'setRoomParticipants' : ActorMethod<[string, Array<string>], undefined>,
+  'setSystemMessage' : ActorMethod<[string, string, string], undefined>,
   'toggleBestFriend' : ActorMethod<[Principal], undefined>,
   'updateProfilePicture' : ActorMethod<[ExternalBlob], undefined>,
 }

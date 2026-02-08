@@ -1,13 +1,16 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
-  "summary": "Build MessageCenter, a social communication app with messaging, video creation/sharing, video ratings, customizable profiles, theming (including dark/light mode), and a friends/best-friends list.",
+  "projectStateVersion": 13,
+  "summary": "Build MessageCenter, a social communication app with Internet Identity sign-in plus an optional guest mode (enter username/display name without signing in), 1:1 messaging, joinable chat rooms (code-based, up to 50 participants, polling updates), video creation/sharing, video ratings, customizable profiles, theming (including dark/light mode), and a friends/best-friends list.",
   "architectural_notes": [
     "User discovery/search should be based on profile fields (username/displayName) rather than Principal ID.",
-    "In chat/inbox UI, show the other user's displayName (or username as fallback) rather than Principal ID / raw identifier strings."
+    "In chat/inbox UI, show the other user's displayName (or username as fallback) rather than Principal ID / raw identifier strings.",
+    "Guest mode is supported as an alternative to Internet Identity sign-in (manual username/displayName entry).",
+    "Rooms are a separate feature from 1:1 chats; room messages update via periodic polling; max room size is 50 participants."
   ],
   "known_issues": [
-    "Chat UI is showing random letters/numbers (likely Principal ID) instead of the other user's displayName when opening a chat."
+    "Chat UI is showing random letters/numbers (likely Principal ID) instead of the other user's displayName when opening a chat.",
+    "Theme color customization UI does not currently apply any visible color changes when the user selects new theme colors."
   ],
   "isFixRequest": false,
   "existing_features": [
@@ -162,6 +165,62 @@
         "REQ-21"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-make-the-selected-theme-color-visibly-affect-the-app-by-wiring-it-into-the-css-variables-that-tailwind-shadcn-components-actually-use-e-g-primary-and-ring-so-ui-elements-buttons-active-nav-text-focus-rings-etc-change-when-the-user-chooses-a-new-theme-color",
+      "title": "Make the selected theme color visibly affect the app by wiring it into the CSS variables that Tailwind/Shadcn components actually use (e.g., primary and ring), so UI elements (buttons, active nav text, focus rings, etc.) change when the user chooses a new theme color.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-settings-theme-color-editor-so-the-color-input-reflects-the-current-saved-theme-color-once-the-user-profile-theme-context-finishes-loading-and-so-the-user-can-preview-color-changes-reliably-before-saving",
+      "title": "Fix the Settings > Theme Color editor so the color input reflects the current saved theme color once the user profile/theme context finishes loading, and so the user can preview color changes reliably before saving.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-guest-mode-alternative-to-internet-identity-sign-in-where-a-user-can-enter-a-username-and-display-name-without-using-internet-identity-and-then-access-the-app-as-a-guest-without-being-blocked-by-the-existing-authentication-gate",
+      "title": "Add a guest-mode alternative to Internet Identity sign-in where a user can enter a username and display name without using Internet Identity, and then access the app as a guest without being blocked by the existing authentication gate.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-rooms-feature-separate-from-existing-1-1-chats-users-can-create-a-room-that-generates-a-join-code-and-other-users-can-join-a-room-using-that-code",
+      "title": "Add a new Rooms feature (separate from existing 1:1 chats): users can create a room that generates a join code, and other users can join a room using that code.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-room-messaging-where-all-room-participants-can-post-messages-and-messages-update-via-periodic-polling-no-websockets",
+      "title": "Implement room messaging where all room participants can post messages, and messages update via periodic polling (no WebSockets).",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enforce-a-maximum-of-50-participants-per-room-preventing-additional-joins-beyond-the-limit-and-providing-a-clear-english-error-message-when-the-room-is-full",
+      "title": "Enforce a maximum of 50 participants per room, preventing additional joins beyond the limit and providing a clear English error message when the room is full.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-rooms-navigation-to-the-app-shell-so-users-can-access-rooms-alongside-existing-screens-without-modifying-immutable-hook-files",
+      "title": "Add Rooms navigation to the app shell so users can access Rooms alongside existing screens, without modifying immutable hook files.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -238,6 +297,26 @@
       "summary": "Remove the entire call feature from the backend Motoko canister, including all call-related types, state, and public methods, so the canister interface no longer exposes any call APIs.",
       "reqIds": [
         "REQ-19"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add a guest-mode alternative to Internet Identity where users can enter a username and display name without signing in",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add joinable chat rooms (separate from 1:1 chats) where hosts create a room code, users join via code, messaging updates via periodic polling, and rooms support up to 50 participants",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Implement backend support for guest identities (not tied to the caller Principal) so guest users can have a stable in-app identity for room participation and messaging, without changing or removing existing Internet Identity-based user/profile behavior.",
+      "reqIds": [
+        "REQ-25"
       ],
       "status": "pending"
     }

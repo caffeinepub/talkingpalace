@@ -1,0 +1,231 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "Build TalkingPalace, a social communication app with calling, messaging, video creation/sharing, video ratings, customizable profiles, theming (including dark/light mode), and a friends/best-friends list.",
+  "architectural_notes": [
+    "User discovery/search should be based on profile fields (username/displayName) rather than Principal ID.",
+    "In chat/inbox UI, show the other user's displayName (or username as fallback) rather than Principal ID / raw identifier strings."
+  ],
+  "known_issues": [
+    "Chat UI is showing random letters/numbers (likely Principal ID) instead of the other user's displayName when opening a chat."
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-implement-internet-identity-sign-in-and-a-user-profile-model-tied-to-the-authenticated-principal-including-unique-username-display-name-profile-picture-and-user-preferences-theme-colors-dark-light-mode",
+      "title": "Implement Internet Identity sign-in and a user profile model tied to the authenticated Principal, including: unique username, display name, profile picture, and user preferences (theme colors + dark/light mode).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-1-1-direct-messaging-feature-between-users-including-the-ability-to-reply-to-a-specific-message-threaded-via-a-reply-to-reference",
+      "title": "Add a 1:1 direct messaging feature between users, including the ability to reply to a specific message (threaded via a reply-to reference).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-1-1-calling-feature-as-a-call-request-call-log-workflow-users-can-initiate-a-call-request-to-another-user-the-recipient-can-accept-decline-and-both-users-see-call-status-updates-and-call-history-placed-received-missed",
+      "title": "Add a 1:1 calling feature as a call-request/call-log workflow: users can initiate a call request to another user, the recipient can accept/decline, and both users see call status updates and call history (placed/received/missed).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enable-recording-videos-in-the-browser-and-sending-them-to-another-user-as-a-video-message-item-include-basic-in-app-editing-before-sending-at-minimum-trim-start-end",
+      "title": "Enable recording videos in the browser and sending them to another user as a video message item; include basic in-app editing before sending (at minimum: trim start/end).",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-video-rating-system-for-shared-videos-allowing-recipients-to-rate-from-0-5-to-5-0-stars-in-0-5-increments-and-display-aggregate-rating-information-per-video",
+      "title": "Add a video rating system for shared videos, allowing recipients to rate from 0.5 to 5.0 stars (in 0.5 increments), and display aggregate rating information per video.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-profile-picture-customization-users-can-upload-set-a-profile-image-using-either-a-camera-capture-flow-when-supported-by-the-browser-or-a-file-picker-display-the-profile-picture-across-the-app-messages-friends-list-profiles",
+      "title": "Implement profile picture customization: users can upload/set a profile image using either a camera capture flow (when supported by the browser) or a file picker; display the profile picture across the app (messages, friends list, profiles).",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-friends-management-users-can-search-add-friends-by-username-view-a-friends-list-and-remove-friends",
+      "title": "Add friends management: users can search/add friends by username, view a friends list, and remove friends.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-best-friend-flag-per-friend-best-friends-are-pinned-to-the-top-of-the-friends-list-and-show-a-star-icon-next-to-their-username",
+      "title": "Add a “best friend” flag per friend; best friends are pinned to the top of the friends list and show a star icon next to their username.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-app-wide-theming-allow-users-to-customize-theme-colors-e-g-primary-accent-background-and-persist-these-preferences-apply-consistently-across-core-screens-and-components",
+      "title": "Implement app-wide theming: allow users to customize theme colors (e.g., primary/accent/background) and persist these preferences; apply consistently across core screens and components.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-dark-mode-light-mode-toggle-that-works-with-the-customizable-theme-colors-and-persists-per-user",
+      "title": "Implement a dark mode / light mode toggle that works with the customizable theme colors and persists per user.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-core-navigation-and-screens-for-sign-in-inbox-chats-chat-detail-messages-video-items-call-history-requests-friends-list-user-profile-view-edit-settings-theme-dark-light",
+      "title": "Create core navigation and screens for: Sign in, Inbox/Chats, Chat detail (messages + video items), Call history/requests, Friends list, User profile (view/edit), Settings (theme + dark/light).",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-choose-and-apply-a-coherent-visual-theme-colors-typography-layout-style-appropriate-for-a-social-communication-app-avoid-blue-purple-as-the-primary-palette-ensure-consistent-styling-across-all-screens",
+      "title": "Choose and apply a coherent visual theme (colors, typography, layout style) appropriate for a social communication app; avoid blue/purple as the primary palette. Ensure consistent styling across all screens.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-generated-static-image-assets-and-use-them-in-the-ui-app-logo-default-avatar-and-at-least-one-empty-state-illustration-consistent-with-the-chosen-visual-theme-store-them-under-frontend-public-assets-generated-and-reference-them-directly-from-the-frontend",
+      "title": "Add generated static image assets and use them in the UI: app logo, default avatar, and at least one empty-state illustration consistent with the chosen visual theme. Store them under frontend/public/assets/generated and reference them directly from the frontend.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-friends-page-add-friend-dialog-so-users-can-search-by-username-or-display-name-see-a-list-of-matching-users-and-add-a-friend-by-selecting-a-search-result-without-typing-pasting-a-principal-id",
+      "title": "Update the Friends page “Add Friend” dialog so users can search by username or display name, see a list of matching users, and add a friend by selecting a search result (without typing/pasting a Principal ID).",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-extend-react-query-hooks-to-support-the-new-user-search-api-used-by-the-friends-page",
+      "title": "Add/extend React Query hooks to support the new user search API used by the Friends page.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-inbox-chats-list-to-display-each-friend-s-displayname-and-username-instead-of-showing-the-friend-s-principal-text-random-letters-numbers",
+      "title": "Update the Inbox/Chats list to display each friend’s displayName (and username) instead of showing the friend’s Principal text (random letters/numbers).",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fetch-and-render-friend-profile-data-displayname-username-profilepicture-for-inbox-chats-entries-using-existing-profile-query-capabilities-without-changing-immutable-hook-files",
+      "title": "Fetch and render friend profile data (displayName, username, profilePicture) for Inbox/Chats entries using existing profile query capabilities, without changing immutable hook files.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "1:1 calling between users",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "1:1 messaging with ability to reply to messages",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Record, edit, and send videos between users",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Rate shared videos from 0.5 to 5 stars",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Customizable app theme colors",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Customizable usernames and display names",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Customizable profile pictures (take photo or choose from photo library)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Toggle between dark mode and light mode",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Friends list with add-friend capability",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Best friends feature: pin to top of friends list and show star icon next to username",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Update user search to find people by username or display name (instead of Principal ID)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add a backend query method that allows searching for users by username or display name (instead of requiring a Principal ID), and returns enough information for the UI to display results and add the selected user as a friend.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "TalkingPalace",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

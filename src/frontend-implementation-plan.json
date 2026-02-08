@@ -1,0 +1,44 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Inbox chat list: render friend display names/usernames/avatars instead of Principal IDs",
+  "requirements": [
+    {
+      "id": "REQ-17",
+      "summary": "Replace Principal-based labels in the Inbox/Chats list with friend displayName and username, with non-Principal placeholders/fallbacks.",
+      "acceptanceCriteria": [
+        "On the Inbox page, each chat entry renders the friend’s displayName when the friend profile is available.",
+        "If the friend profile is not yet loaded, the UI shows a sensible placeholder (e.g., \"Loading…\") rather than the Principal text.",
+        "If the friend profile cannot be found, the UI falls back gracefully (e.g., \"Unknown user\") and does not show raw Principal IDs as the primary label."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/InboxPage.tsx",
+          "operation": "modify",
+          "description": "Update chat list rendering to use fetched friend profile data for primary/secondary text (displayName + @username). Ensure loading and not-found states show \"Loading…\" / \"Unknown user\" (and do not display raw Principal IDs as the primary label). Keep navigation param as the friend Principal string for routing to /chat/$userId."
+        }
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "summary": "Fetch friend UserProfile data for Inbox entries via existing React Query patterns and render avatars using the existing Avatar component, without editing immutable hook/UI paths.",
+      "acceptanceCriteria": [
+        "Inbox page chat entries show the friend’s avatar using the existing Avatar component with the fetched UserProfile (profilePicture when available, otherwise default avatar).",
+        "Friend profile lookups are performed via existing frontend query patterns (React Query) and do not require editing files under frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+        "Navigating into a chat from the Inbox still routes to /chat/$userId with the friend’s Principal text as the route param, but the visible label in the list is the friend’s displayName."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useInboxFriendProfiles.ts",
+          "operation": "create",
+          "description": "Add a dedicated hook that takes the friends list (Principal strings) and performs per-friend profile lookups using TanStack React Query patterns (e.g., multi-query), returning a mapping of principalText -> { profile, isLoading, isError }. Ensure it does not require changes to any immutable hook files."
+        },
+        {
+          "path": "frontend/src/pages/InboxPage.tsx",
+          "operation": "modify",
+          "description": "Wire the new useInboxFriendProfiles hook into the Inbox list. For each friend, pass the fetched UserProfile into the existing Avatar component to display profilePicture when available (otherwise default). Verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
+}

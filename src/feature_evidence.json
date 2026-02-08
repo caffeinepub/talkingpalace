@@ -1,0 +1,48 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-inbox-chats-list-to-display-each-friend-s-displayname-and-username-instead-of-showing-the-friend-s-principal-text-random-letters-numbers",
+      "featureTitle": "Update the Inbox/Chats list to display each friend’s displayName (and username) instead of showing the friend’s Principal text (random letters/numbers).",
+      "files": [
+        "frontend/src/pages/InboxPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-17"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fetch-and-render-friend-profile-data-displayname-username-profilepicture-for-inbox-chats-entries-using-existing-profile-query-capabilities-without-changing-immutable-hook-files",
+      "featureTitle": "Fetch and render friend profile data (displayName, username, profilePicture) for Inbox/Chats entries using existing profile query capabilities, without changing immutable hook files.",
+      "files": [
+        "frontend/src/hooks/useInboxFriendProfiles.ts",
+        "frontend/src/pages/InboxPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "camera@1.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-18"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

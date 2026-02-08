@@ -1,0 +1,65 @@
+{
+  "kind": "build_request",
+  "title": "Fix chat UI to show friend display names instead of Principal IDs",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-17",
+      "text": "Update the Inbox/Chats list to display each friend’s displayName (and username) instead of showing the friend’s Principal text (random letters/numbers).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "whenever I go to chat with someone, instead of showing their displayname, it just shows random letters and numbers. please fix that."
+        ]
+      },
+      "acceptanceCriteria": [
+        "On the Inbox page, each chat entry renders the friend’s displayName when the friend profile is available.",
+        "If the friend profile is not yet loaded, the UI shows a sensible placeholder (e.g., \"Loading…\") rather than the Principal text.",
+        "If the friend profile cannot be found, the UI falls back gracefully (e.g., \"Unknown user\") and does not show raw Principal IDs as the primary label."
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "text": "Fetch and render friend profile data (displayName, username, profilePicture) for Inbox/Chats entries using existing profile query capabilities, without changing immutable hook files.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "instead of showing their displayname, it just shows random letters and numbers"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Inbox page chat entries show the friend’s avatar using the existing Avatar component with the fetched UserProfile (profilePicture when available, otherwise default avatar).",
+        "Friend profile lookups are performed via existing frontend query patterns (React Query) and do not require editing files under frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+        "Navigating into a chat from the Inbox still routes to /chat/$userId with the friend’s Principal text as the route param, but the visible label in the list is the friend’s displayName."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit any files under frontend immutablePaths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Keep the backend as a single Motoko actor; do not introduce additional backend services."
+  ],
+  "nonGoals": [
+    "Do not change the underlying friends list backend schema or add new backend endpoints unless strictly necessary to fix the display-name issue.",
+    "Do not implement group chats or additional messaging features beyond fixing the displayed name/identity in chat lists."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

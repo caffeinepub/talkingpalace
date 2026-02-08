@@ -28,11 +28,11 @@
   "frontend/src/utils/color.ts": "Utility function to convert hex color codes to OKLCH format (L C H components) for CSS variable compatibility with proper validation and clamping.",
   "frontend/src/hooks/useGuestSession.ts": "Hook for managing guest session state with localStorage persistence, providing create/clear functions and guest ID generation.",
   "frontend/src/hooks/useParticipantIdentity.ts": "Hook that returns unified participant identity (either Internet Identity principal or guest ID) for use in rooms.",
-  "frontend/src/hooks/useRooms.ts": "React Query hooks for room operations including fetching all rooms, creating rooms, joining with codes, and leaving rooms with proper error handling.",
-  "frontend/src/hooks/useRoomMessagesPolling.ts": "React Query hooks for room messaging with 3-second polling interval to fetch and send room messages.",
+  "frontend/src/hooks/useRooms.ts": "React Query hooks for room operations including fetching all rooms, creating rooms, joining with codes, and leaving rooms with proper participantId wiring and friendly error handling for guests and authenticated users.",
+  "frontend/src/hooks/useRoomMessagesPolling.ts": "React Query hooks for room messaging with 3-second polling interval, passing participantId to backend methods for fetching and sending room messages with proper error handling.",
   "frontend/src/utils/rooms.ts": "Utility functions for generating random 6-character join codes and validating join code format.",
   "frontend/src/components/layout/GuestBadge.tsx": "Small badge component displaying \"Guest\" label for guest users in the UI.",
   "frontend/src/components/rooms/RoomMessageItem.tsx": "Message bubble component for room messages with sender name, timestamp, and optional video support.",
-  "frontend/src/pages/RoomsPage.tsx": "Rooms list page with create room and join room dialogs, displaying all user's rooms with participant counts and join code management.",
-  "frontend/src/pages/RoomChatPage.tsx": "Room chat page with message list, real-time polling updates, participant profile fetching, and message composer with send functionality."
+  "frontend/src/pages/RoomsPage.tsx": "Rooms list page with create room and join room dialogs, displaying all user's rooms with participant counts and join code management, with simplified join code validation that accepts any case and whitespace.",
+  "frontend/src/pages/RoomChatPage.tsx": "Room chat page with message list, real-time polling updates, participant profile fetching, and message composer with send functionality, properly handling room loading states and passing senderProfile to RoomMessageItem component."
 }

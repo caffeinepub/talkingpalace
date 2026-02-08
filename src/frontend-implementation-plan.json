@@ -1,163 +1,59 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Guest sign-in and code-based Rooms with polling chat",
+  "title": "Guest-friendly room joining and participantId wiring for rooms",
   "requirements": [
     {
-      "id": "REQ-24",
-      "summary": "Add guest sign-in flow (username + display name) that bypasses the Internet Identity-only auth gate and persists locally, with unified sign-out.",
+      "id": "REQ-31",
+      "summary": "Ensure guest participants can load room details, poll messages, and send messages by consistently using the same participant identifier in all room-related calls.",
       "acceptanceCriteria": [
-        "The sign-in screen offers both options: \"Sign In with Internet Identity\" and \"Continue as Guest\" (or equivalent) with username + display name inputs.",
-        "Submitting guest username + display name stores a guest session locally (persisting across refresh) and routes into the authenticated app shell (Inbox/Friends/Profile/Settings remain reachable).",
-        "Signing out clears the guest session as well as any Internet Identity session state, returning the user to the sign-in screen.",
-        "User-facing text is in English."
+        "A user who is not signed in with Internet Identity (guest session) can join a room by code and is added to that room’s participants list using their guest participant identifier.",
+        "After joining as a guest, the guest can load the room details and poll messages without receiving an \"Unauthorized: You are not a participant in this room\" error.",
+        "After joining as a guest, the guest can send room messages successfully and those messages are visible to other participants via polling.",
+        "Internet Identity users can still join, view, and send room messages without regression."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/hooks/useGuestSession.ts",
-          "operation": "create",
-          "description": "Implement a guest-session hook that can create/load/clear a locally-persisted guest session (guestId, username, displayName) and expose helpers for sign-in and sign-out."
-        },
-        {
-          "path": "frontend/src/pages/SignInPage.tsx",
-          "operation": "modify",
-          "description": "Extend the sign-in screen to include a guest sign-in form (username + display name) alongside the existing Internet Identity button; on guest submit, create and persist the guest session and route into the app. Use existing shadcn-ui form controls (e.g., Button/Input) for consistent UI; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Adjust auth gating to allow entry when either Internet Identity is present or a valid guest session exists, while keeping the existing Internet Identity path intact. Ensure guest users do not trigger the Internet Identity profile setup modal."
-        },
-        {
-          "path": "frontend/src/components/layout/AppShell.tsx",
-          "operation": "modify",
-          "description": "Update the app shell logout flow to clear guest session state in addition to Internet Identity state and cached queries, then return the user to the sign-in screen. Use existing DropdownMenu/Button components for the user menu; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/layout/GuestBadge.tsx",
-          "operation": "create",
-          "description": "Add a small, reusable UI element to indicate when the current session is a guest session (e.g., \"Guest\" label) for use in the app shell/user menu. Compose from existing shadcn-ui primitives; verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-26",
-      "summary": "Add Rooms feature UI to create rooms with a generated join code and join rooms using a code, separate from 1:1 chats.",
-      "acceptanceCriteria": [
-        "Backend supports creating a room with a host and a room join code, and joining a room by providing the code.",
-        "Frontend provides UI to create a room (showing the generated code to the host) and to join a room via code input.",
-        "Rooms are clearly presented as a separate section from 1:1 chats (do not replace/remove 1:1 chats).",
-        "If a join code is invalid, the UI shows an English error message and does not navigate into a room."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/RoomsPage.tsx",
-          "operation": "create",
-          "description": "Create a Rooms page that lists the user's rooms and provides create-room and join-room actions (code input), keeping the feature clearly separate from 1:1 chats. Use existing shadcn-ui components (Card/Dialog/Button/Input) for layout and dialogs; verify the component's usage instructions before implementing."
-        },
         {
           "path": "frontend/src/hooks/useRooms.ts",
-          "operation": "create",
-          "description": "Add React Query hooks/mutations for rooms: fetch rooms for the current participant, create room (generate/display join code), join room by code, and leave room where appropriate."
-        },
-        {
-          "path": "frontend/src/utils/rooms.ts",
-          "operation": "create",
-          "description": "Add room utilities such as join-code generation and lightweight client-side validation (length/charset) used by the Rooms UI."
-        },
-        {
-          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Register new routes for Rooms list and Room chat screens (e.g., /rooms and /rooms/$roomId) and wire them into the router tree so navigation works end-to-end."
-        },
-        {
-          "path": "frontend/src/components/layout/AppShell.tsx",
-          "operation": "modify",
-          "description": "Keep existing 1:1 chats navigation intact and add Rooms as a separate navigation item that routes to the Rooms page. Use existing Button-based bottom navigation styling; verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-27",
-      "summary": "Implement Room chat screen with message sending and periodic polling updates (no WebSockets).",
-      "acceptanceCriteria": [
-        "Backend stores room messages with sender identity, timestamp, and content, and exposes query methods suitable for polling (e.g., fetch latest messages, optionally since a timestamp/id).",
-        "Frontend room chat screen renders messages and automatically refreshes using periodic polling (e.g., every few seconds) so new messages appear without manual refresh.",
-        "Sending a room message causes it to appear for the sender immediately and for other participants on their next poll.",
-        "The implementation does not use WebSockets or real-time push."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/RoomChatPage.tsx",
-          "operation": "create",
-          "description": "Create the Room chat screen (header, message list, composer) that sends room messages and refreshes messages via periodic polling. Reuse existing UI patterns from ChatDetailPage where appropriate, without altering 1:1 chat behavior. Use existing shadcn-ui inputs/buttons and existing chat visual language; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/rooms/RoomMessageItem.tsx",
-          "operation": "create",
-          "description": "Add a message-rendering component tailored to RoomMessage (sender label, timestamp, content, optional video if present), similar to the 1:1 MessageItem but for room message types."
+          "description": "Wire room data fetching to the backend interface by passing the active participantIdentity.id to room-related backend capabilities (list rooms, get room details, leave room), and align function signatures with frontend/src/backend.d.ts. Ensure the react-query keys include participantIdentity.id so guest vs authenticated caches do not mix."
         },
         {
           "path": "frontend/src/hooks/useRoomMessagesPolling.ts",
-          "operation": "create",
-          "description": "Implement polling-based message retrieval for a room using React Query (refetch interval) and optional 'sinceTimestamp' tracking/merging to efficiently append new messages without WebSockets."
+          "operation": "modify",
+          "description": "Update polling and send-message hooks to pass participantIdentity.id into room messaging backend capabilities (poll messages, send message) and to include participantIdentity.id in query keys. Add friendly handling for authorization failures so guests don’t see raw trap text."
         },
         {
-          "path": "frontend/src/hooks/useParticipantIdentity.ts",
-          "operation": "create",
-          "description": "Add a small hook that resolves the current participant identity string used by rooms (Internet Identity principal text when signed in, otherwise guestId) and provides display metadata for UI labeling."
+          "path": "frontend/src/pages/RoomChatPage.tsx",
+          "operation": "modify",
+          "description": "Adjust room chat usage of hooks so loading room details, polling messages, and sending messages all operate with the active participant identity (guest or Internet Identity). Ensure user-facing error feedback remains friendly and in English if room access fails."
         }
       ]
     },
     {
-      "id": "REQ-28",
-      "summary": "Display clear English UI error when joining a full room (50 participants max) and prevent navigation on failure.",
+      "id": "REQ-32",
+      "summary": "Allow joining rooms without Internet Identity and show clear English feedback during join failures.",
       "acceptanceCriteria": [
-        "Backend prevents joining a room once it already has 50 participants.",
-        "Frontend displays a clear English error message when a user attempts to join a full room.",
-        "When the room is at 49 participants, the next join succeeds; when at 50, further joins fail consistently."
+        "If the user has a guest session, the Rooms page \"Join Room\" flow successfully joins using the guest participant identity (no Internet Identity required).",
+        "If the user is not signed in at all, the app directs them to the existing Sign In page and they can use \"Continue as Guest\" to proceed to Rooms and join successfully.",
+        "When join fails due to an invalid code, the toast shows a friendly English message (e.g., \"Invalid join code. Please check and try again.\") rather than a raw trap string.",
+        "When join fails due to the room being full, the toast shows a friendly English message indicating the 50 participant limit."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/RoomsPage.tsx",
+          "path": "frontend/src/pages/SignInPage.tsx",
           "operation": "modify",
-          "description": "Handle join failures by showing clear English error messages for invalid code and full-room scenarios, and ensure the UI does not navigate into a room on failure. Use the existing toast system for errors where appropriate."
-        },
-        {
-          "path": "frontend/src/hooks/useRooms.ts",
-          "operation": "modify",
-          "description": "Normalize room join errors into user-friendly messages (e.g., detect 'room full' vs invalid code) for consistent UI handling."
-        }
-      ]
-    },
-    {
-      "id": "REQ-29",
-      "summary": "Add Rooms navigation in the app shell and ensure navigation flow Rooms list → Create/Join → Room chat works without modifying immutable hook files.",
-      "acceptanceCriteria": [
-        "Bottom navigation includes a \"Rooms\" entry that routes to a Rooms page.",
-        "A user can navigate: Rooms list -> Create room / Join room -> Room chat screen.",
-        "No files under the declared immutable frontend paths are modified; any new data fetching uses new hooks/files or existing mutable hooks."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/layout/AppShell.tsx",
-          "operation": "modify",
-          "description": "Add a \"Rooms\" tab to bottom navigation and ensure it highlights correctly based on current route, without disrupting existing navigation items. Compose using existing shadcn-ui Button patterns; verify the component's usage instructions before implementing."
+          "description": "Preserve the user’s intended destination when the app shows the Sign In page due to missing authentication, so that after \"Continue as Guest\" the user returns to Rooms (or the originally requested route) and can join successfully. Keep all user-facing error messages in English."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire Rooms routes into the router (Rooms list and Room chat) so the required navigation path is supported."
+          "description": "Ensure the unauthenticated gating flow reliably renders the existing Sign In page while retaining the current route intent, so users can proceed as guest and then continue to Rooms without manual navigation."
         },
         {
           "path": "frontend/src/pages/RoomsPage.tsx",
-          "operation": "create",
-          "description": "Implement the Rooms page as the entry point reachable from the new navigation tab (ensuring it is not an orphan page). Use existing shadcn-ui components; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/RoomChatPage.tsx",
-          "operation": "create",
-          "description": "Implement the Room chat page as a navigable destination from the Rooms page actions (create/join) and from the rooms list."
+          "operation": "modify",
+          "description": "Keep the join-code normalization behavior (trim + case normalization) and ensure join failures always surface friendly English toasts (invalid code vs room full) using the error mapping provided by the join hook."
         }
       ]
     }

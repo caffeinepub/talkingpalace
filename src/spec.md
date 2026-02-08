@@ -1,15 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Add an alternative guest sign-in flow alongside Internet Identity, and introduce joinable code-based chat rooms with polling-based message updates and a 50-participant cap.
+**Goal:** Make room joining reliable (no false “Invalid join code” errors) and allow users to join and participate in rooms as guests without requiring Internet Identity.
 
 **Planned changes:**
-- Update the sign-in screen to offer both “Sign In with Internet Identity” and “Continue as Guest” with username + display name inputs.
-- Persist a guest session locally so guest users can access the authenticated app shell, and ensure signing out clears both guest and Internet Identity session state.
-- Add backend support for stable guest identities (not based on the anonymous Principal) while preserving existing Internet Identity profile and 1:1 chat behavior.
-- Add a new Rooms section (separate from existing 1:1 chats) with UI to create a room (show join code) and join a room by code (with invalid-code errors).
-- Implement room messaging with periodic polling for updates (no WebSockets), including sender identity, timestamps, and suitable “fetch latest/since” querying.
-- Enforce a maximum of 50 participants per room with consistent backend rejection and clear frontend error messaging when full.
-- Add Rooms navigation entry in the app shell to support: Rooms list → Create/Join → Room chat, without modifying declared immutable frontend paths.
+- Normalize room join codes in the backend lookup (trim whitespace and handle case-insensitive matching) and keep invalid-code errors in clear English.
+- Fix backend room membership checks and message authorization to work for guest participants using the same guest participant identifier that was used when joining.
+- Update the frontend Rooms “Join Room” flow to support joining via guest sessions, route unsigned users to Sign In with “Continue as Guest,” and display friendly English toasts for invalid codes and full rooms.
 
-**User-visible outcome:** Users can sign in either with Internet Identity or as a guest, then create rooms that generate a join code, join rooms by code (up to 50 participants), and chat in rooms where messages refresh automatically via polling.
+**User-visible outcome:** Users can join rooms successfully even if they paste codes with extra spaces or different letter casing, and they can join/view/send messages as guests without Internet Identity, with clear English feedback when joining fails.

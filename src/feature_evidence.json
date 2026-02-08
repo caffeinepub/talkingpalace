@@ -2,62 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-guest-mode-alternative-to-internet-identity-sign-in-where-a-user-can-enter-a-username-and-display-name-without-using-internet-identity-and-then-access-the-app-as-a-guest-without-being-blocked-by-the-existing-authentication-gate",
-      "featureTitle": "Add a guest-mode alternative to Internet Identity sign-in where a user can enter a username and display name without using Internet Identity, and then access the app as a guest without being blocked by the existing authentication gate.",
+      "featureId": "feature-make-guest-participation-in-rooms-work-end-to-end-by-ensuring-room-membership-checks-and-room-messaging-authorization-work-for-non-internet-identity-participants-guests-using-the-same-participant-identifier-that-was-used-to-join-the-room",
+      "featureTitle": "Make guest participation in rooms work end-to-end by ensuring room membership checks and room messaging authorization work for non-Internet-Identity participants (guests) using the same participant identifier that was used to join the room.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/layout/AppShell.tsx",
-        "frontend/src/components/layout/GuestBadge.tsx",
-        "frontend/src/hooks/useGuestSession.ts",
-        "frontend/src/pages/SignInPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "camera@1.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-24"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-new-rooms-feature-separate-from-existing-1-1-chats-users-can-create-a-room-that-generates-a-join-code-and-other-users-can-join-a-room-using-that-code",
-      "featureTitle": "Add a new Rooms feature (separate from existing 1:1 chats): users can create a room that generates a join code, and other users can join a room using that code.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/layout/AppShell.tsx",
-        "frontend/src/hooks/useRooms.ts",
-        "frontend/src/pages/RoomsPage.tsx",
-        "frontend/src/utils/rooms.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "camera@1.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-26"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-room-messaging-where-all-room-participants-can-post-messages-and-messages-update-via-periodic-polling-no-websockets",
-      "featureTitle": "Implement room messaging where all room participants can post messages, and messages update via periodic polling (no WebSockets).",
-      "files": [
-        "frontend/src/components/rooms/RoomMessageItem.tsx",
-        "frontend/src/hooks/useParticipantIdentity.ts",
         "frontend/src/hooks/useRoomMessagesPolling.ts",
+        "frontend/src/hooks/useRooms.ts",
         "frontend/src/pages/RoomChatPage.tsx"
       ],
       "components": [
@@ -71,15 +20,14 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-27"
+        "REQ-31"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-enforce-a-maximum-of-50-participants-per-room-preventing-additional-joins-beyond-the-limit-and-providing-a-clear-english-error-message-when-the-room-is-full",
-      "featureTitle": "Enforce a maximum of 50 participants per room, preventing additional joins beyond the limit and providing a clear English error message when the room is full.",
+      "featureId": "feature-update-the-rooms-join-flow-so-users-are-not-required-to-use-internet-identity-to-join-a-room-and-the-ui-provides-clear-english-feedback-when-joining-fails",
+      "featureTitle": "Update the Rooms join flow so users are not required to use Internet Identity to join a room, and the UI provides clear English feedback when joining fails.",
       "files": [
-        "frontend/src/hooks/useRooms.ts",
         "frontend/src/pages/RoomsPage.tsx"
       ],
       "components": [
@@ -93,31 +41,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-28"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-rooms-navigation-to-the-app-shell-so-users-can-access-rooms-alongside-existing-screens-without-modifying-immutable-hook-files",
-      "featureTitle": "Add Rooms navigation to the app shell so users can access Rooms alongside existing screens, without modifying immutable hook files.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/layout/AppShell.tsx",
-        "frontend/src/pages/RoomChatPage.tsx",
-        "frontend/src/pages/RoomsPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "camera@1.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-29"
+        "REQ-32"
       ],
       "confidence": "high"
     }

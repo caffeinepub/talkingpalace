@@ -174,17 +174,17 @@ export interface backendInterface {
     createOrUpdateGuestProfile(guestId: string, displayName: string, profilePicture: ExternalBlob | null): Promise<void>;
     createOrUpdateProfile(username: string, displayName: string, themeColor: string, darkMode: boolean): Promise<void>;
     createRoom(joinCode: string, isGroup: boolean): Promise<string>;
-    getAllRooms(filterParticipant: string | null): Promise<Array<Room>>;
+    getAllRooms(participantId: string, filterParticipant: string | null): Promise<Array<Room>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getFriendsList(): Promise<Array<Friend>>;
     getGuestProfile(guestId: string): Promise<GuestProfile | null>;
     getMessagesWithUser(other: Principal): Promise<Array<Message>>;
     getProfile(user: Principal): Promise<UserProfile | null>;
-    getRoom(roomId: string): Promise<Room>;
-    getRoomMessages(roomId: string, sinceTimestamp: Time | null): Promise<Array<RoomMessage>>;
-    getRoomParticipants(roomId: string): Promise<Array<string>>;
-    getSystemMessages(roomId: string, sinceTimestamp: Time | null): Promise<Array<SystemMessage>>;
+    getRoom(roomId: string, participantId: string): Promise<Room>;
+    getRoomMessages(roomId: string, participantId: string, sinceTimestamp: Time | null): Promise<Array<RoomMessage>>;
+    getRoomParticipants(roomId: string, participantId: string): Promise<Array<string>>;
+    getSystemMessages(roomId: string, participantId: string, sinceTimestamp: Time | null): Promise<Array<SystemMessage>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     joinRoom(roomId: string, participantId: string): Promise<void>;
@@ -194,9 +194,9 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     searchUsers(term: string): Promise<Array<SearchResult>>;
     sendMessage(receiver: Principal, content: string, replyTo: bigint | null, video: ExternalBlob | null): Promise<void>;
-    sendRoomMessage(roomId: string, content: string, replyTo: bigint | null, video: ExternalBlob | null): Promise<void>;
+    sendRoomMessage(roomId: string, participantId: string, content: string, replyTo: bigint | null, video: ExternalBlob | null): Promise<void>;
     setRoomParticipants(roomId: string, participants: Array<string>): Promise<void>;
-    setSystemMessage(roomId: string, content: string, messageType: string): Promise<void>;
+    setSystemMessage(roomId: string, participantId: string, content: string, messageType: string): Promise<void>;
     toggleBestFriend(friend: Principal): Promise<void>;
     updateProfilePicture(picture: ExternalBlob): Promise<void>;
 }
@@ -371,17 +371,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getAllRooms(arg0: string | null): Promise<Array<Room>> {
+    async getAllRooms(arg0: string, arg1: string | null): Promise<Array<Room>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getAllRooms(to_candid_opt_n12(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.getAllRooms(arg0, to_candid_opt_n12(this._uploadFile, this._downloadFile, arg1));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getAllRooms(to_candid_opt_n12(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.getAllRooms(arg0, to_candid_opt_n12(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -469,59 +469,59 @@ export class Backend implements backendInterface {
             return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getRoom(arg0: string): Promise<Room> {
+    async getRoom(arg0: string, arg1: string): Promise<Room> {
         if (this.processError) {
             try {
-                const result = await this.actor.getRoom(arg0);
+                const result = await this.actor.getRoom(arg0, arg1);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getRoom(arg0);
+            const result = await this.actor.getRoom(arg0, arg1);
             return result;
         }
     }
-    async getRoomMessages(arg0: string, arg1: Time | null): Promise<Array<RoomMessage>> {
+    async getRoomMessages(arg0: string, arg1: string, arg2: Time | null): Promise<Array<RoomMessage>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getRoomMessages(arg0, to_candid_opt_n26(this._uploadFile, this._downloadFile, arg1));
+                const result = await this.actor.getRoomMessages(arg0, arg1, to_candid_opt_n26(this._uploadFile, this._downloadFile, arg2));
                 return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getRoomMessages(arg0, to_candid_opt_n26(this._uploadFile, this._downloadFile, arg1));
+            const result = await this.actor.getRoomMessages(arg0, arg1, to_candid_opt_n26(this._uploadFile, this._downloadFile, arg2));
             return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getRoomParticipants(arg0: string): Promise<Array<string>> {
+    async getRoomParticipants(arg0: string, arg1: string): Promise<Array<string>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getRoomParticipants(arg0);
+                const result = await this.actor.getRoomParticipants(arg0, arg1);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getRoomParticipants(arg0);
+            const result = await this.actor.getRoomParticipants(arg0, arg1);
             return result;
         }
     }
-    async getSystemMessages(arg0: string, arg1: Time | null): Promise<Array<SystemMessage>> {
+    async getSystemMessages(arg0: string, arg1: string, arg2: Time | null): Promise<Array<SystemMessage>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getSystemMessages(arg0, to_candid_opt_n26(this._uploadFile, this._downloadFile, arg1));
+                const result = await this.actor.getSystemMessages(arg0, arg1, to_candid_opt_n26(this._uploadFile, this._downloadFile, arg2));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getSystemMessages(arg0, to_candid_opt_n26(this._uploadFile, this._downloadFile, arg1));
+            const result = await this.actor.getSystemMessages(arg0, arg1, to_candid_opt_n26(this._uploadFile, this._downloadFile, arg2));
             return result;
         }
     }
@@ -651,17 +651,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async sendRoomMessage(arg0: string, arg1: string, arg2: bigint | null, arg3: ExternalBlob | null): Promise<void> {
+    async sendRoomMessage(arg0: string, arg1: string, arg2: string, arg3: bigint | null, arg4: ExternalBlob | null): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.sendRoomMessage(arg0, arg1, to_candid_opt_n35(this._uploadFile, this._downloadFile, arg2), await to_candid_opt_n10(this._uploadFile, this._downloadFile, arg3));
+                const result = await this.actor.sendRoomMessage(arg0, arg1, arg2, to_candid_opt_n35(this._uploadFile, this._downloadFile, arg3), await to_candid_opt_n10(this._uploadFile, this._downloadFile, arg4));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.sendRoomMessage(arg0, arg1, to_candid_opt_n35(this._uploadFile, this._downloadFile, arg2), await to_candid_opt_n10(this._uploadFile, this._downloadFile, arg3));
+            const result = await this.actor.sendRoomMessage(arg0, arg1, arg2, to_candid_opt_n35(this._uploadFile, this._downloadFile, arg3), await to_candid_opt_n10(this._uploadFile, this._downloadFile, arg4));
             return result;
         }
     }
@@ -679,17 +679,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async setSystemMessage(arg0: string, arg1: string, arg2: string): Promise<void> {
+    async setSystemMessage(arg0: string, arg1: string, arg2: string, arg3: string): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.setSystemMessage(arg0, arg1, arg2);
+                const result = await this.actor.setSystemMessage(arg0, arg1, arg2, arg3);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.setSystemMessage(arg0, arg1, arg2);
+            const result = await this.actor.setSystemMessage(arg0, arg1, arg2, arg3);
             return result;
         }
     }

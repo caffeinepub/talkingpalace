@@ -106,18 +106,21 @@ export interface _SERVICE {
     undefined
   >,
   'createRoom' : ActorMethod<[string, boolean], string>,
-  'getAllRooms' : ActorMethod<[[] | [string]], Array<Room>>,
+  'getAllRooms' : ActorMethod<[string, [] | [string]], Array<Room>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getFriendsList' : ActorMethod<[], Array<Friend>>,
   'getGuestProfile' : ActorMethod<[string], [] | [GuestProfile]>,
   'getMessagesWithUser' : ActorMethod<[Principal], Array<Message>>,
   'getProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'getRoom' : ActorMethod<[string], Room>,
-  'getRoomMessages' : ActorMethod<[string, [] | [Time]], Array<RoomMessage>>,
-  'getRoomParticipants' : ActorMethod<[string], Array<string>>,
+  'getRoom' : ActorMethod<[string, string], Room>,
+  'getRoomMessages' : ActorMethod<
+    [string, string, [] | [Time]],
+    Array<RoomMessage>
+  >,
+  'getRoomParticipants' : ActorMethod<[string, string], Array<string>>,
   'getSystemMessages' : ActorMethod<
-    [string, [] | [Time]],
+    [string, string, [] | [Time]],
     Array<SystemMessage>
   >,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
@@ -133,11 +136,11 @@ export interface _SERVICE {
     undefined
   >,
   'sendRoomMessage' : ActorMethod<
-    [string, string, [] | [bigint], [] | [ExternalBlob]],
+    [string, string, string, [] | [bigint], [] | [ExternalBlob]],
     undefined
   >,
   'setRoomParticipants' : ActorMethod<[string, Array<string>], undefined>,
-  'setSystemMessage' : ActorMethod<[string, string, string], undefined>,
+  'setSystemMessage' : ActorMethod<[string, string, string, string], undefined>,
   'toggleBestFriend' : ActorMethod<[Principal], undefined>,
   'updateProfilePicture' : ActorMethod<[ExternalBlob], undefined>,
 }

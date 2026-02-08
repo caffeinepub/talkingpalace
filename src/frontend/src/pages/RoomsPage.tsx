@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useGetAllRooms, useCreateRoom, useJoinRoomWithCode } from '../hooks/useRooms';
-import { generateJoinCode, validateJoinCode } from '../utils/rooms';
+import { generateJoinCode } from '../utils/rooms';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,9 +46,9 @@ export default function RoomsPage() {
   };
 
   const handleJoinRoom = () => {
-    const code = joinCode.trim().toUpperCase();
-    if (!validateJoinCode(code)) {
-      toast.error('Invalid join code format. Must be 6 characters (A-Z, 0-9)');
+    const code = joinCode.trim();
+    if (code.length !== 6) {
+      toast.error('Join code must be 6 characters');
       return;
     }
 
@@ -113,14 +113,14 @@ export default function RoomsPage() {
                     id="joinCode"
                     placeholder="ABC123"
                     value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                    onChange={(e) => setJoinCode(e.target.value)}
                     maxLength={6}
                     disabled={isJoining}
                   />
                 </div>
                 <Button
                   onClick={handleJoinRoom}
-                  disabled={isJoining || joinCode.length !== 6}
+                  disabled={isJoining || joinCode.trim().length !== 6}
                   className="w-full"
                 >
                   {isJoining ? (

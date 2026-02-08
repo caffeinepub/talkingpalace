@@ -1,142 +1,78 @@
 {
   "kind": "build_request",
-  "title": "Add guest sign-in plus joinable chat rooms (code-based, max 50, polling updates)",
+  "title": "Fix invalid room join codes and allow joining rooms without Internet Identity",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-24",
-      "text": "Add a guest-mode alternative to Internet Identity sign-in where a user can enter a username and display name without using Internet Identity, and then access the app as a guest without being blocked by the existing authentication gate.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-2"
-        ],
-        "quotes": [
-          "add a feature where you can directly put in your username and display name without needing to sign in.",
-          "for number 1, keep the internet identity sign in while the guest mode will be an alternitive way of signing in."
-        ]
-      },
-      "acceptanceCriteria": [
-        "The sign-in screen offers both options: \"Sign In with Internet Identity\" and \"Continue as Guest\" (or equivalent) with username + display name inputs.",
-        "Submitting guest username + display name stores a guest session locally (persisting across refresh) and routes into the authenticated app shell (Inbox/Friends/Profile/Settings remain reachable).",
-        "Signing out clears the guest session as well as any Internet Identity session state, returning the user to the sign-in screen.",
-        "User-facing text is in English."
-      ]
-    },
-    {
-      "id": "REQ-25",
-      "text": "Implement backend support for guest identities (not tied to the caller Principal) so guest users can have a stable in-app identity for room participation and messaging, without changing or removing existing Internet Identity-based user/profile behavior.",
+      "id": "REQ-30",
+      "text": "Fix the room join-code lookup so that a valid room join code never fails with an \"Invalid join code\" error due to case or whitespace differences, and ensure user-facing error messages remain in English.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1",
-          "msg-2"
+          "msg-6",
+          "msg-7"
         ],
         "quotes": [
-          "add a feature where you can directly put in your username and display name without needing to sign in.",
-          "keep the internet identity sign in while the guest mode will be an alternitive way of signing in."
+          "for number 1, it said \"invalid code\".",
+          "I told someone the exact code there was for a room I made, but it said it was invalid, so fix that."
         ]
       },
       "acceptanceCriteria": [
-        "Backend exposes a guest-oriented API surface that allows: creating/reading a guest profile and using that guest identity to interact with rooms and room messages.",
-        "Existing Principal-based profile APIs and 1:1 messaging APIs continue to work for Internet Identity users without behavior regressions.",
-        "Guest identity values are generated/managed in a way that avoids different guests overwriting each other’s data when using the anonymous principal (i.e., the guest identity key must not be the anonymous Principal)."
+        "Joining a room with the correct code succeeds even if the entered code contains leading/trailing spaces.",
+        "Joining a room with the correct code succeeds even if the entered code uses lowercase letters.",
+        "If no room exists for the provided code, the backend traps with an English error message that clearly indicates the code is invalid (and the frontend shows a friendly English message)."
       ]
     },
     {
-      "id": "REQ-26",
-      "text": "Add a new Rooms feature (separate from existing 1:1 chats): users can create a room that generates a join code, and other users can join a room using that code.",
+      "id": "REQ-31",
+      "text": "Make guest participation in rooms work end-to-end by ensuring room membership checks and room messaging authorization work for non-Internet-Identity participants (guests) using the same participant identifier that was used to join the room.",
       "target": "both",
       "source": {
         "messageIds": [
-          "msg-1",
-          "msg-3"
+          "msg-12"
         ],
         "quotes": [
-          "instead of group chats, add rooms, where you can join the room with a code that the room host made.",
-          "for number 3, yes"
+          "also, make it so you don't need your internet identity to join a group"
         ]
       },
       "acceptanceCriteria": [
-        "Backend supports creating a room with a host and a room join code, and joining a room by providing the code.",
-        "Frontend provides UI to create a room (showing the generated code to the host) and to join a room via code input.",
-        "Rooms are clearly presented as a separate section from 1:1 chats (do not replace/remove 1:1 chats).",
-        "If a join code is invalid, the UI shows an English error message and does not navigate into a room."
+        "A user who is not signed in with Internet Identity (guest session) can join a room by code and is added to that room’s participants list using their guest participant identifier.",
+        "After joining as a guest, the guest can load the room details and poll messages without receiving an \"Unauthorized: You are not a participant in this room\" error.",
+        "After joining as a guest, the guest can send room messages successfully and those messages are visible to other participants via polling.",
+        "Internet Identity users can still join, view, and send room messages without regression."
       ]
     },
     {
-      "id": "REQ-27",
-      "text": "Implement room messaging where all room participants can post messages, and messages update via periodic polling (no WebSockets).",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-4"
-        ],
-        "quotes": [
-          "in rooms, you can message each other at the same time.",
-          "for number 2, yes."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend stores room messages with sender identity, timestamp, and content, and exposes query methods suitable for polling (e.g., fetch latest messages, optionally since a timestamp/id).",
-        "Frontend room chat screen renders messages and automatically refreshes using periodic polling (e.g., every few seconds) so new messages appear without manual refresh.",
-        "Sending a room message causes it to appear for the sender immediately and for other participants on their next poll.",
-        "The implementation does not use WebSockets or real-time push."
-      ]
-    },
-    {
-      "id": "REQ-28",
-      "text": "Enforce a maximum of 50 participants per room, preventing additional joins beyond the limit and providing a clear English error message when the room is full.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "the maximum number of people that can be in a room is 50 people."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend prevents joining a room once it already has 50 participants.",
-        "Frontend displays a clear English error message when a user attempts to join a full room.",
-        "When the room is at 49 participants, the next join succeeds; when at 50, further joins fail consistently."
-      ]
-    },
-    {
-      "id": "REQ-29",
-      "text": "Add Rooms navigation to the app shell so users can access Rooms alongside existing screens, without modifying immutable hook files.",
+      "id": "REQ-32",
+      "text": "Update the Rooms join flow so users are not required to use Internet Identity to join a room, and the UI provides clear English feedback when joining fails.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1",
-          "msg-3"
+          "msg-12",
+          "msg-13"
         ],
         "quotes": [
-          "add rooms, where you can join the room with a code that the room host made.",
-          "yes"
+          "also, make it so you don't need your internet identity to join a group",
+          "start the build"
         ]
       },
       "acceptanceCriteria": [
-        "Bottom navigation includes a \"Rooms\" entry that routes to a Rooms page.",
-        "A user can navigate: Rooms list -> Create room / Join room -> Room chat screen.",
-        "No files under the declared immutable frontend paths are modified; any new data fetching uses new hooks/files or existing mutable hooks."
+        "If the user has a guest session, the Rooms page \"Join Room\" flow successfully joins using the guest participant identity (no Internet Identity required).",
+        "If the user is not signed in at all, the app directs them to the existing Sign In page and they can use \"Continue as Guest\" to proceed to Rooms and join successfully.",
+        "When join fails due to an invalid code, the toast shows a friendly English message (e.g., \"Invalid join code. Please check and try again.\") rather than a raw trap string.",
+        "When join fails due to the room being full, the toast shows a friendly English message indicating the 50 participant limit."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo; keep all Motoko logic in that actor.",
-    "Only add backend/migration.mo if state migration is required for existing deployed state (conditional migration policy).",
-    "Do not modify frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui (compose instead).",
-    "Room message updates must use periodic polling (no WebSockets / push).",
-    "Use English for all user-facing text."
+    "Do not implement any offline room/group creation; the user confirmed \"you'll need internet for everything\".",
+    "Backend must remain a single-actor Motoko canister (all logic in backend/main.mo).",
+    "Do not modify frontend files under frontend/src/components/ui or other paths listed as immutable in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Removing or rewriting the existing 1:1 chats feature (rooms must be added as a separate feature).",
-    "Removing Internet Identity sign-in (it must remain available).",
-    "Implementing true real-time messaging via WebSockets or other push technologies.",
-    "Adding external databases or non-Motoko backend services."
+    "Adding any offline-first behavior for rooms or messaging.",
+    "Adding third-party authentication providers beyond Internet Identity.",
+    "Implementing real-time updates via WebSockets (rooms continue to use polling)."
   ],
   "imageRequirements": {
     "required": [],

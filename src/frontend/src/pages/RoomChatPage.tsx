@@ -3,7 +3,6 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { useGetRoom } from '../hooks/useRooms';
 import { useGetRoomMessages, useSendRoomMessage } from '../hooks/useRoomMessagesPolling';
 import { useParticipantIdentity } from '../hooks/useParticipantIdentity';
-import { useGetUserProfile } from '../hooks/useQueries';
 import { useActor } from '../hooks/useActor';
 import RoomMessageItem from '../components/rooms/RoomMessageItem';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ export default function RoomChatPage() {
   const navigate = useNavigate();
   const { actor } = useActor();
   const participantIdentity = useParticipantIdentity();
-  const { data: room } = useGetRoom(roomId);
+  const { data: room, isLoading: roomLoading } = useGetRoom(roomId);
   const { data: messages = [], isLoading: messagesLoading } = useGetRoomMessages(roomId);
   const { mutate: sendMessage, isPending: isSending } = useSendRoomMessage();
 
@@ -82,7 +81,7 @@ export default function RoomChatPage() {
           setMessageContent('');
         },
         onError: (error) => {
-          toast.error('Failed to send message: ' + error.message);
+          toast.error(error.message);
         },
       }
     );
@@ -95,11 +94,22 @@ export default function RoomChatPage() {
     }
   };
 
-  if (!room) {
+  if (roomLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         <p className="text-muted-foreground mt-4">Loading room...</p>
+      </div>
+    );
+  }
+
+  if (!room) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 space-y-4">
+        <p className="text-muted-foreground">Room not found or you don't have access</p>
+        <Button onClick={() => navigate({ to: '/rooms' })}>
+          Back to Rooms
+        </Button>
       </div>
     );
   }
@@ -138,13 +148,13 @@ export default function RoomChatPage() {
           messages.map((message) => {
             const isOwnMessage = participantIdentity?.id === message.sender;
             const senderProfile = participantProfiles.get(message.sender);
-            
+
             return (
               <RoomMessageItem
                 key={message.id.toString()}
                 message={message}
                 isOwnMessage={isOwnMessage}
-                senderProfile={senderProfile}
+                senderProfile={senderProfile || null}
               />
             );
           })
@@ -159,7 +169,7 @@ export default function RoomChatPage() {
             placeholder="Type a message..."
             value={messageContent}
             onChange={(e) => setMessageContent(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             disabled={isSending}
             className="min-h-[60px] max-h-[120px] resize-none"
           />
@@ -167,7 +177,7 @@ export default function RoomChatPage() {
             onClick={handleSendMessage}
             disabled={isSending || !messageContent.trim()}
             size="icon"
-            className="h-[60px] w-[60px] flex-shrink-0"
+            className="h-[60px] w-[60px] shrink-0"
           >
             {isSending ? (
               <Loader2 className="h-5 w-5 animate-spin" />

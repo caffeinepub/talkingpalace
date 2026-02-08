@@ -1,18 +1,20 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 13,
+  "projectStateVersion": 15,
   "summary": "Build MessageCenter, a social communication app with Internet Identity sign-in plus an optional guest mode (enter username/display name without signing in), 1:1 messaging, joinable chat rooms (code-based, up to 50 participants, polling updates), video creation/sharing, video ratings, customizable profiles, theming (including dark/light mode), and a friends/best-friends list.",
   "architectural_notes": [
     "User discovery/search should be based on profile fields (username/displayName) rather than Principal ID.",
     "In chat/inbox UI, show the other user's displayName (or username as fallback) rather than Principal ID / raw identifier strings.",
     "Guest mode is supported as an alternative to Internet Identity sign-in (manual username/displayName entry).",
-    "Rooms are a separate feature from 1:1 chats; room messages update via periodic polling; max room size is 50 participants."
+    "Rooms are a separate feature from 1:1 chats; room messages update via periodic polling; max room size is 50 participants.",
+    "Rooms require internet connectivity (no offline room/group creation)."
   ],
   "known_issues": [
     "Chat UI is showing random letters/numbers (likely Principal ID) instead of the other user's displayName when opening a chat.",
-    "Theme color customization UI does not currently apply any visible color changes when the user selects new theme colors."
+    "Theme color customization UI does not currently apply any visible color changes when the user selects new theme colors.",
+    "Joining a room via a shared join code can fail with an \"invalid code\" error even when the code is correct."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-implement-internet-identity-sign-in-and-a-user-profile-model-tied-to-the-authenticated-principal-including-unique-username-display-name-profile-picture-and-user-preferences-theme-colors-dark-light-mode",
@@ -221,6 +223,22 @@
         "REQ-29"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-make-guest-participation-in-rooms-work-end-to-end-by-ensuring-room-membership-checks-and-room-messaging-authorization-work-for-non-internet-identity-participants-guests-using-the-same-participant-identifier-that-was-used-to-join-the-room",
+      "title": "Make guest participation in rooms work end-to-end by ensuring room membership checks and room messaging authorization work for non-Internet-Identity participants (guests) using the same participant identifier that was used to join the room.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-rooms-join-flow-so-users-are-not-required-to-use-internet-identity-to-join-a-room-and-the-ui-provides-clear-english-feedback-when-joining-fails",
+      "title": "Update the Rooms join flow so users are not required to use Internet Identity to join a room, and the UI provides clear English feedback when joining fails.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -317,6 +335,20 @@
       "summary": "Implement backend support for guest identities (not tied to the caller Principal) so guest users can have a stable in-app identity for room participation and messaging, without changing or removing existing Internet Identity-based user/profile behavior.",
       "reqIds": [
         "REQ-25"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Allow users to join Rooms without requiring Internet Identity sign-in (e.g., join as guest)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Fix the room join-code lookup so that a valid room join code never fails with an \"Invalid join code\" error due to case or whitespace differences, and ensure user-facing error messages remain in English.",
+      "reqIds": [
+        "REQ-30"
       ],
       "status": "pending"
     }

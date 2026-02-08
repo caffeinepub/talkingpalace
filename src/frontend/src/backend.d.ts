@@ -81,17 +81,17 @@ export interface backendInterface {
     createOrUpdateGuestProfile(guestId: string, displayName: string, profilePicture: ExternalBlob | null): Promise<void>;
     createOrUpdateProfile(username: string, displayName: string, themeColor: string, darkMode: boolean): Promise<void>;
     createRoom(joinCode: string, isGroup: boolean): Promise<string>;
-    getAllRooms(filterParticipant: string | null): Promise<Array<Room>>;
+    getAllRooms(participantId: string, filterParticipant: string | null): Promise<Array<Room>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getFriendsList(): Promise<Array<Friend>>;
     getGuestProfile(guestId: string): Promise<GuestProfile | null>;
     getMessagesWithUser(other: Principal): Promise<Array<Message>>;
     getProfile(user: Principal): Promise<UserProfile | null>;
-    getRoom(roomId: string): Promise<Room>;
-    getRoomMessages(roomId: string, sinceTimestamp: Time | null): Promise<Array<RoomMessage>>;
-    getRoomParticipants(roomId: string): Promise<Array<string>>;
-    getSystemMessages(roomId: string, sinceTimestamp: Time | null): Promise<Array<SystemMessage>>;
+    getRoom(roomId: string, participantId: string): Promise<Room>;
+    getRoomMessages(roomId: string, participantId: string, sinceTimestamp: Time | null): Promise<Array<RoomMessage>>;
+    getRoomParticipants(roomId: string, participantId: string): Promise<Array<string>>;
+    getSystemMessages(roomId: string, participantId: string, sinceTimestamp: Time | null): Promise<Array<SystemMessage>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     joinRoom(roomId: string, participantId: string): Promise<void>;
@@ -101,9 +101,9 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     searchUsers(term: string): Promise<Array<SearchResult>>;
     sendMessage(receiver: Principal, content: string, replyTo: bigint | null, video: ExternalBlob | null): Promise<void>;
-    sendRoomMessage(roomId: string, content: string, replyTo: bigint | null, video: ExternalBlob | null): Promise<void>;
+    sendRoomMessage(roomId: string, participantId: string, content: string, replyTo: bigint | null, video: ExternalBlob | null): Promise<void>;
     setRoomParticipants(roomId: string, participants: Array<string>): Promise<void>;
-    setSystemMessage(roomId: string, content: string, messageType: string): Promise<void>;
+    setSystemMessage(roomId: string, participantId: string, content: string, messageType: string): Promise<void>;
     toggleBestFriend(friend: Principal): Promise<void>;
     updateProfilePicture(picture: ExternalBlob): Promise<void>;
 }

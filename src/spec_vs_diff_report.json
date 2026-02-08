@@ -1,82 +1,59 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-08T22:08:10.256Z",
-  "summary": "Guest sign-in, Rooms navigation/UI, and room message polling were added on the frontend. Backend was extended with new types/state for guest profiles, rooms, and room messages, but the diff excerpt does not show the required backend API methods or enforcement logic (join-by-code, max-50 cap, guest profile create/read, polling-friendly message queries), so several backend-side requirements cannot be verified from the provided diff summary. Additionally, room-message video support and frontend-generated join codes appear implemented without being requested.",
+  "generatedAt": "2026-02-08T22:37:24.596Z",
+  "summary": "Diff implements participant-identity plumbing in frontend room hooks and adds backend support types/helpers for guest IDs, plus a migration that normalizes stored join codes. However, some BuildRequest requirements and constraints are not evidenced in the provided diff summary (notably redirecting unsigned users to Sign In for joining, and backend room membership/message authorization for guests). The diff also adds an unrequested migration module, which appears to violate the stated single-file backend logic constraint.",
   "missing_requirements": [
     {
-      "id": "REQ-25",
-      "requirement": "Backend exposes a guest-oriented API surface to create/read guest profiles and use guest identity for rooms and room messages; guest identity must not be keyed by anonymous Principal; existing Principal-based APIs must continue without regressions.",
-      "reason": "Although backend state/types for GuestProfile exist, the diff summary excerpt does not show any shared/query methods for creating/reading guest profiles or how guest identities are generated/validated and kept distinct from the anonymous principal; it also does not show integration of guest identity into room/message methods.",
+      "id": "REQ-30",
+      "requirement": "Fix room join-code lookup so valid codes never fail due to case/whitespace differences; trap in English when invalid.",
+      "reason": "The diff shows a migration that normalizes stored join codes, and the frontend trims input, but there is no visible backend join-code lookup/normalization logic or trap message text in the truncated backend/main.mo diff to confirm lookup handles lowercase/whitespace and traps with a clear English invalid-code message.",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo (truncated)",
+        "frontend/src/pages/RoomsPage.tsx"
+      ]
+    },
+    {
+      "id": "REQ-31",
+      "requirement": "Guest participation works end-to-end: guest join adds guest identifier; guest can load room, poll messages, and send messages without Unauthorized errors; II users unaffected.",
+      "reason": "Frontend now passes a participant identity into room APIs, and backend defines mixed participant IDs and helper functions, but the diff summary does not include the backend implementations of joinRoomWithCode/getRoom/getRoomMessages/sendRoomMessage authorization checks. Therefore it cannot be confirmed that membership checks and message authorization consistently use the same guest identifier and no longer reject guests as unauthorized.",
       "evidence": [
         "backend/main.mo (truncated)",
-        "frontend/src/pages/RoomChatPage.tsx (calls actor.getGuestProfile, implying backend method must exist but not evidenced in diff excerpt)"
+        "frontend/src/hooks/useRooms.ts",
+        "frontend/src/hooks/useRoomMessagesPolling.ts",
+        "frontend/src/pages/RoomChatPage.tsx"
       ]
     },
     {
-      "id": "REQ-26",
-      "requirement": "Backend supports creating a room that generates a join code and joining a room by providing the code.",
-      "reason": "Frontend generates join codes and passes them into actor.createRoom(joinCode, ...) rather than showing backend-generated join codes. The backend excerpt shows Room type has joinCode but does not show create/join implementations or join code generation.",
+      "id": "REQ-32",
+      "requirement": "Rooms join flow should not require Internet Identity; if not signed in at all, direct user to existing Sign In page and allow Continue as Guest; provide friendly English toasts for invalid code and room-full.",
+      "reason": "Friendly English error mapping for invalid code and room-full is implemented in the join hook, but there is no evidence that the Rooms join flow detects the 'not signed in at all' state and redirects to the Sign In page. Current hooks simply return empty data or throw 'No participant identity', and RoomsPage as shown does not implement redirect-to-sign-in behavior.",
       "evidence": [
-        "frontend/src/pages/RoomsPage.tsx (uses generateJoinCode() then actor.createRoom({ joinCode: code,... }))",
-        "frontend/src/hooks/useRooms.ts (createRoom takes joinCode from caller)",
-        "backend/main.mo (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-27",
-      "requirement": "Backend stores room messages with sender identity, timestamp, content and exposes polling-suitable query methods (e.g., fetch latest messages optionally since timestamp/id).",
-      "reason": "Frontend polls actor.getRoomMessages(roomId, null) every 3s, but the backend excerpt does not include the getRoomMessages query implementation nor evidence of a 'since' parameter behavior suitable for polling.",
-      "evidence": [
-        "frontend/src/hooks/useRoomMessagesPolling.ts (getRoomMessages(roomId, null), refetchInterval 3000)",
-        "backend/main.mo (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-28",
-      "requirement": "Backend prevents joining a room once it already has 50 participants; frontend shows clear English error when room is full; join behavior is consistent at 49 vs 50 participants.",
-      "reason": "Backend defines roomMaxParticipants = 50, and frontend maps certain error substrings to a 'room is full' message, but the backend join enforcement logic and the exact error signaling are not shown in the provided backend diff excerpt, so the max-50 enforcement cannot be verified.",
-      "evidence": [
-        "backend/main.mo (truncated) (roomMaxParticipants = 50)",
-        "frontend/src/hooks/useRooms.ts (checks error.message includes 'Room is full'/'Maximum number of participants')"
+        "frontend/src/hooks/useRooms.ts",
+        "frontend/src/pages/RoomsPage.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Room messages include optional video rendering/support in the room chat UI.",
-      "reason": "REQ-27 only requires text content + sender + timestamp and polling updates; it does not request video messages in rooms.",
+      "description": "Added a backend data migration module to normalize join codes and wired it into the actor via `(with migration = Migration.run)`.",
+      "reason": "The BuildRequest did not ask for a data migration system, and the stated constraint says backend must remain a single-actor Motoko canister with all logic in backend/main.mo; adding backend/migration.mo appears outside that constraint.",
       "evidence": [
-        "frontend/src/components/rooms/RoomMessageItem.tsx (renders message.video with <video>)",
-        "frontend/src/hooks/useRoomMessagesPolling.ts (sendRoomMessage includes video param)"
-      ]
-    },
-    {
-      "description": "Join code is generated on the frontend and supplied to backend createRoom(joinCode, ...), rather than being generated by the backend.",
-      "reason": "REQ-26 states 'create a room that generates a join code' (implying backend-generated code). The implemented flow generates the code client-side.",
-      "evidence": [
-        "frontend/src/utils/rooms.ts (generateJoinCode)",
-        "frontend/src/pages/RoomsPage.tsx (generateJoinCode then createRoom with joinCode)",
-        "frontend/src/hooks/useRooms.ts (createRoom mutationFn takes joinCode)"
+        "backend/migration.mo",
+        "backend/main.mo"
       ]
     }
   ],
   "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/components/layout/AppShell.tsx",
-    "frontend/src/components/layout/GuestBadge.tsx",
-    "frontend/src/components/rooms/RoomMessageItem.tsx",
-    "frontend/src/hooks/useGuestSession.ts",
-    "frontend/src/hooks/useParticipantIdentity.ts",
     "frontend/src/hooks/useRoomMessagesPolling.ts",
     "frontend/src/hooks/useRooms.ts",
     "frontend/src/pages/RoomChatPage.tsx",
     "frontend/src/pages/RoomsPage.tsx",
-    "frontend/src/pages/SignInPage.tsx",
-    "frontend/src/utils/rooms.ts",
     "project_state.json"
   ]
 }

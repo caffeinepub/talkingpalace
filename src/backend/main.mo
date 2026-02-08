@@ -13,7 +13,9 @@ import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   // Authorization
   let accessControlState = AccessControl.initState();
@@ -130,8 +132,22 @@ actor {
     };
   };
 
-  func getParticipantId(caller : Principal) : Text {
-    caller.toText();
+  func getParticipantId(caller : Principal, providedId : ?Text) : Text {
+    // For authenticated users, use their Principal
+    // For guests, they must provide their guestId
+    if (caller.isAnonymous()) {
+      switch (providedId) {
+        case (null) { Runtime.trap("Guest must provide participant ID") };
+        case (?id) { id };
+      };
+    } else {
+      caller.toText();
+    };
+  };
+
+  func validateGuestId(guestId : Text) : Bool {
+    // Validate that the guestId exists in guestProfiles
+    guestProfiles.containsKey(guestId);
   };
 
   // General Messaging Functions
@@ -197,7 +213,7 @@ actor {
     };
 
     let profile = switch (profiles.get(caller)) {
-      case (null) { Runtime.trap("User not found.") };
+      case (null) { Runtime.trap("User not found") };
       case (?profile) { profile };
     };
 
@@ -241,7 +257,7 @@ actor {
     let newRoom : Room = {
       id = roomId;
       creator = caller;
-      joinCode;
+      joinCode = joinCode.trim(#char ' ').toLower(); // Normalize to lower-case and trim whitespace
       participants = [caller.toText()];
       isGroup;
     };
@@ -252,9 +268,24 @@ actor {
 
   public shared ({ caller }) func joinRoomWithCode(joinCode : Text, participantId : Text) : async Text {
     // Any caller (including guests) can join a room with valid join code
-    // Find room by join code
+    // For guests, validate that the guestId exists
+    if (caller.isAnonymous()) {
+      if (not validateGuestId(participantId)) {
+        Runtime.trap("Invalid guest ID. Please create a guest profile first");
+      };
+    } else {
+      // For authenticated users, participantId must match their principal
+      if (participantId != caller.toText()) {
+        Runtime.trap("Participant ID must match your principal");
+      };
+    };
+
+    let normalizedCode = joinCode.trim(#char ' ').toLower(); // Normalize input code
+
     let roomEntry = rooms.toArray().find(
-      func((id, room)) { Text.equal(room.joinCode, joinCode) }
+      func((id, room)) {
+        room.joinCode == normalizedCode
+      }
     );
 
     let (roomId, room) = switch (roomEntry) {
@@ -271,7 +302,6 @@ actor {
       case (null) {};
     };
 
-
     let updatedParticipants = room.participants.concat([participantId]);
     let updatedRoom = { room with participants = updatedParticipants };
     rooms.add(roomId, updatedRoom);
@@ -281,7 +311,18 @@ actor {
 
   public shared ({ caller }) func joinRoom(roomId : Text, participantId : Text) : async () {
     // Any caller (including guests) can join if they know the room ID
-    // This is used for re-joining or direct invites
+    // For guests, validate that the guestId exists
+    if (caller.isAnonymous()) {
+      if (not validateGuestId(participantId)) {
+        Runtime.trap("Invalid guest ID. Please create a guest profile first");
+      };
+    } else {
+      // For authenticated users, participantId must match their principal
+      if (participantId != caller.toText()) {
+        Runtime.trap("Participant ID must match your principal");
+      };
+    };
+
     let room = switch (rooms.get(roomId)) {
       case (null) { Runtime.trap("Room not found") };
       case (?room) { room };
@@ -301,15 +342,20 @@ actor {
     rooms.add(roomId, updatedRoom);
   };
 
-  public shared ({ caller }) func sendRoomMessage(roomId : Text, content : Text, replyTo : ?Nat, video : ?Storage.ExternalBlob) : async () {
+  public shared ({ caller }) func sendRoomMessage(roomId : Text, participantId : Text, content : Text, replyTo : ?Nat, video : ?Storage.ExternalBlob) : async () {
     // Any caller (including guests) can send messages if they are a participant
     let room = switch (rooms.get(roomId)) {
       case (null) { Runtime.trap("Room not found") };
       case (?room) { room };
     };
 
-    // Determine sender ID based on caller
-    let senderId = getParticipantId(caller);
+    // Validate participantId matches caller
+    let senderId = getParticipantId(caller, ?participantId);
+
+    // For guests, validate the guestId exists
+    if (caller.isAnonymous() and not validateGuestId(senderId)) {
+      Runtime.trap("Invalid guest ID. Please create a guest profile first");
+    };
 
     if (not isParticipantInRoom(room, senderId)) {
       Runtime.trap("Unauthorized: You are not a participant in this room");
@@ -329,15 +375,21 @@ actor {
     nextMessageId += 1;
   };
 
-  public query ({ caller }) func getRoomMessages(roomId : Text, sinceTimestamp : ?Time.Time) : async [RoomMessage] {
+  public query ({ caller }) func getRoomMessages(roomId : Text, participantId : Text, sinceTimestamp : ?Time.Time) : async [RoomMessage] {
     // Any caller (including guests) can view messages if they are a participant
     let room = switch (rooms.get(roomId)) {
       case (null) { Runtime.trap("Room not found") };
       case (?room) { room };
     };
 
-    let participantId = getParticipantId(caller);
-    if (not isParticipantInRoom(room, participantId)) {
+    let callerId = getParticipantId(caller, ?participantId);
+
+    // For guests, validate the guestId exists
+    if (caller.isAnonymous() and not validateGuestId(callerId)) {
+      Runtime.trap("Invalid guest ID. Please create a guest profile first");
+    };
+
+    if (not isParticipantInRoom(room, callerId)) {
       Runtime.trap("Unauthorized: You are not a participant in this room");
     };
 
@@ -360,15 +412,21 @@ actor {
     filteredMessages;
   };
 
-  public query ({ caller }) func getSystemMessages(roomId : Text, sinceTimestamp : ?Time.Time) : async [SystemMessage] {
+  public query ({ caller }) func getSystemMessages(roomId : Text, participantId : Text, sinceTimestamp : ?Time.Time) : async [SystemMessage] {
     // Any caller (including guests) can view system messages if they are a participant
     let room = switch (rooms.get(roomId)) {
       case (null) { Runtime.trap("Room not found") };
       case (?room) { room };
     };
 
-    let participantId = getParticipantId(caller);
-    if (not isParticipantInRoom(room, participantId)) {
+    let callerId = getParticipantId(caller, ?participantId);
+
+    // For guests, validate the guestId exists
+    if (caller.isAnonymous() and not validateGuestId(callerId)) {
+      Runtime.trap("Invalid guest ID. Please create a guest profile first");
+    };
+
+    if (not isParticipantInRoom(room, callerId)) {
       Runtime.trap("Unauthorized: You are not a participant in this room");
     };
 
@@ -410,15 +468,21 @@ actor {
     rooms.add(roomId, updatedRoom);
   };
 
-  public shared ({ caller }) func setSystemMessage(roomId : Text, content : Text, messageType : Text) : async () {
+  public shared ({ caller }) func setSystemMessage(roomId : Text, participantId : Text, content : Text, messageType : Text) : async () {
     // Any participant can create system messages (for join/leave notifications)
     let room = switch (rooms.get(roomId)) {
       case (null) { Runtime.trap("Room not found") };
       case (?room) { room };
     };
 
-    let participantId = getParticipantId(caller);
-    if (not isParticipantInRoom(room, participantId)) {
+    let callerId = getParticipantId(caller, ?participantId);
+
+    // For guests, validate the guestId exists
+    if (caller.isAnonymous() and not validateGuestId(callerId)) {
+      Runtime.trap("Invalid guest ID. Please create a guest profile first");
+    };
+
+    if (not isParticipantInRoom(room, callerId)) {
       Runtime.trap("Unauthorized: You are not a participant in this room");
     };
 
@@ -433,15 +497,21 @@ actor {
     nextSystemMessageId += 1;
   };
 
-  public query ({ caller }) func getRoomParticipants(roomId : Text) : async [Text] {
+  public query ({ caller }) func getRoomParticipants(roomId : Text, participantId : Text) : async [Text] {
     // Any caller (including guests) can view participants if they are in the room
     let room = switch (rooms.get(roomId)) {
       case (null) { Runtime.trap("Room not found") };
       case (?room) { room };
     };
 
-    let participantId = getParticipantId(caller);
-    if (not isParticipantInRoom(room, participantId)) {
+    let callerId = getParticipantId(caller, ?participantId);
+
+    // For guests, validate the guestId exists
+    if (caller.isAnonymous() and not validateGuestId(callerId)) {
+      Runtime.trap("Invalid guest ID. Please create a guest profile first");
+    };
+
+    if (not isParticipantInRoom(room, callerId)) {
       Runtime.trap("Unauthorized: You are not a participant in this room");
     };
 
@@ -455,7 +525,12 @@ actor {
       case (?room) { room };
     };
 
-    let callerParticipantId = getParticipantId(caller);
+    let callerParticipantId = getParticipantId(caller, ?participantId);
+
+    // For guests, validate the guestId exists
+    if (caller.isAnonymous() and not validateGuestId(callerParticipantId)) {
+      Runtime.trap("Invalid guest ID. Please create a guest profile first");
+    };
 
     // Check authorization: caller must be removing themselves OR be the room creator
     if (callerParticipantId != participantId and caller != room.creator) {
@@ -469,24 +544,35 @@ actor {
     rooms.add(roomId, updatedRoom);
   };
 
-  public query ({ caller }) func getRoom(roomId : Text) : async Room {
+  public query ({ caller }) func getRoom(roomId : Text, participantId : Text) : async Room {
     // Any caller (including guests) can view room details if they are a participant
     let room = switch (rooms.get(roomId)) {
       case (null) { Runtime.trap("Room not found") };
       case (?room) { room };
     };
 
-    let participantId = getParticipantId(caller);
-    if (not isParticipantInRoom(room, participantId)) {
+    let callerId = getParticipantId(caller, ?participantId);
+
+    // For guests, validate the guestId exists
+    if (caller.isAnonymous() and not validateGuestId(callerId)) {
+      Runtime.trap("Invalid guest ID. Please create a guest profile first");
+    };
+
+    if (not isParticipantInRoom(room, callerId)) {
       Runtime.trap("Unauthorized: You are not a participant in this room");
     };
 
     room;
   };
 
-  public query ({ caller }) func getAllRooms(filterParticipant : ?Text) : async [Room] {
+  public query ({ caller }) func getAllRooms(participantId : Text, filterParticipant : ?Text) : async [Room] {
     // Returns only rooms where the caller is a participant
-    let callerParticipantId = getParticipantId(caller);
+    let callerParticipantId = getParticipantId(caller, ?participantId);
+
+    // For guests, validate the guestId exists
+    if (caller.isAnonymous() and not validateGuestId(callerParticipantId)) {
+      Runtime.trap("Invalid guest ID. Please create a guest profile first");
+    };
 
     let allRooms = rooms.values().toArray();
 
@@ -639,3 +725,4 @@ actor {
     profiles.add(caller, profile);
   };
 };
+

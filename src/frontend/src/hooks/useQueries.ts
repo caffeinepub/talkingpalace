@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Message, Call, Friend, UserProfile, CallStatus, SearchResult } from '../backend';
+import type { Message, Friend, UserProfile, SearchResult } from '../backend';
 import { Principal } from '@dfinity/principal';
 import { ExternalBlob } from '../backend';
 
@@ -36,51 +36,6 @@ export function useSendMessage() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['messages', variables.receiver.toString()] });
-    },
-  });
-}
-
-// Calls
-export function useGetCallHistory() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  return useQuery<Call[]>({
-    queryKey: ['callHistory'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getCallHistory();
-    },
-    enabled: !!actor && !actorFetching,
-    refetchInterval: 5000,
-  });
-}
-
-export function useInitiateCall() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (receiver: Principal) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.initiateCall(receiver);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['callHistory'] });
-    },
-  });
-}
-
-export function useUpdateCallStatus() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (params: { callId: bigint; status: CallStatus }) => {
-      if (!actor) throw new Error('Actor not available');
-      await actor.updateCallStatus(params.callId, params.status);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['callHistory'] });
     },
   });
 }

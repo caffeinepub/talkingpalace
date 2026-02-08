@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
-  "summary": "Build TalkingPalace, a social communication app with calling, messaging, video creation/sharing, video ratings, customizable profiles, theming (including dark/light mode), and a friends/best-friends list.",
+  "projectStateVersion": 9,
+  "summary": "Build MessageCenter, a social communication app with messaging, video creation/sharing, video ratings, customizable profiles, theming (including dark/light mode), and a friends/best-friends list.",
   "architectural_notes": [
     "User discovery/search should be based on profile fields (username/displayName) rather than Principal ID.",
     "In chat/inbox UI, show the other user's displayName (or username as fallback) rather than Principal ID / raw identifier strings."
@@ -9,7 +9,7 @@
   "known_issues": [
     "Chat UI is showing random letters/numbers (likely Principal ID) instead of the other user's displayName when opening a chat."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-implement-internet-identity-sign-in-and-a-user-profile-model-tied-to-the-authenticated-principal-including-unique-username-display-name-profile-picture-and-user-preferences-theme-colors-dark-light-mode",
@@ -146,15 +146,25 @@
         "REQ-18"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-remove-the-entire-call-feature-from-the-frontend-ui-and-data-layer-including-the-calls-page-the-calls-route-call-related-react-query-hooks-and-any-navigation-entries-or-icons-that-link-to-calls",
+      "title": "Remove the entire call feature from the frontend UI and data layer, including the Calls page, the /calls route, call-related React Query hooks, and any navigation entries or icons that link to calls.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rename-the-app-to-messagecenter-in-user-facing-branding-locations-e-g-header-title-and-browser-tab-title-so-the-ui-consistently-shows-the-new-app-name",
+      "title": "Rename the app to “MessageCenter” in user-facing branding locations (e.g., header title and browser tab title) so the UI consistently shows the new app name.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "1:1 calling between users",
-      "reqIds": [],
-      "status": "pending"
-    },
     {
       "id": "AR-2",
       "summary": "1:1 messaging with ability to reply to messages",
@@ -222,10 +232,18 @@
         "REQ-14"
       ],
       "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Remove the entire call feature from the backend Motoko canister, including all call-related types, state, and public methods, so the canister interface no longer exposes any call APIs.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "status": "pending"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "TalkingPalace",
+  "projectName": "MessageCenter",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

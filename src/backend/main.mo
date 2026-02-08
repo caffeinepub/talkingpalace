@@ -2,19 +2,19 @@ import Array "mo:core/Array";
 import Text "mo:core/Text";
 import Iter "mo:core/Iter";
 import Int "mo:core/Int";
-import Time "mo:core/Time";
-import Map "mo:core/Map";
 import List "mo:core/List";
 import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
-
-import MixinAuthorization "authorization/MixinAuthorization";
-import MixinStorage "blob-storage/Mixin";
-
+import Map "mo:core/Map";
+import Time "mo:core/Time";
 import AccessControl "authorization/access-control";
+import MixinAuthorization "authorization/MixinAuthorization";
 import Storage "blob-storage/Storage";
+import MixinStorage "blob-storage/Mixin";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   // Authorization
   let accessControlState = AccessControl.initState();
@@ -49,23 +49,6 @@ actor {
     video : ?Storage.ExternalBlob;
   };
 
-  public type CallStatus = {
-    #pending;
-    #accepted;
-    #declined;
-    #missed;
-    #ended;
-  };
-
-  public type Call = {
-    id : Nat;
-    caller : Principal;
-    receiver : Principal;
-    startTime : Time.Time;
-    endTime : ?Time.Time;
-    status : CallStatus;
-  };
-
   public type Friend = {
     principal : Principal;
     isBestFriend : Bool;
@@ -78,10 +61,8 @@ actor {
   // State
   let profiles = Map.empty<Principal, UserProfile>();
   let messages = Map.empty<Nat, Message>();
-  let calls = Map.empty<Nat, Call>();
   let friendLists = Map.empty<Principal, FriendList>();
   var nextMessageId = 0;
-  var nextCallId = 0;
 
   // Helper Functions
   func compareMessagesByTime(m1 : Message, m2 : Message) : Order.Order {
@@ -173,61 +154,6 @@ actor {
         (msg.sender == caller and msg.receiver == other) or (msg.sender == other and msg.receiver == caller);
       }
     ).sort(compareMessagesByTime);
-  };
-
-  // Calling Functions
-  public shared ({ caller }) func initiateCall(receiver : Principal) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can initiate calls");
-    };
-
-    let call = {
-      id = nextCallId;
-      caller;
-      receiver;
-      startTime = Time.now();
-      endTime = null;
-      status = #pending;
-    };
-
-    calls.add(nextCallId, call);
-    nextCallId += 1;
-    call.id;
-  };
-
-  public shared ({ caller }) func updateCallStatus(callId : Nat, status : CallStatus) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update call status");
-    };
-
-    let existingCall = switch (calls.get(callId)) {
-      case (null) { Runtime.trap("Call not found") };
-      case (?call) { call };
-    };
-
-    // Verify caller is either the caller or receiver of the call
-    if (caller != existingCall.caller and caller != existingCall.receiver) {
-      Runtime.trap("Unauthorized: Only call participants can update call status");
-    };
-
-    calls.add(callId, {
-      id = existingCall.id;
-      caller = existingCall.caller;
-      receiver = existingCall.receiver;
-      startTime = existingCall.startTime;
-      endTime = if (status == #ended) { ?Time.now() } else { existingCall.endTime };
-      status;
-    });
-  };
-
-  public query ({ caller }) func getCallHistory() : async [Call] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view call history");
-    };
-
-    calls.values().toArray().filter(
-      func(call) { call.caller == caller or call.receiver == caller }
-    );
   };
 
   // Friends Management Functions

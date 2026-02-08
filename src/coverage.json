@@ -1,48 +1,70 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-08T03:09:06.803Z",
+  "generatedAt": "2026-02-08T15:17:17.866Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
+    "total": 3,
     "implemented": 2,
     "items": [
       {
-        "id": "REQ-17",
-        "summary": "Update the Inbox/Chats list to display each friend’s displayName (and username) instead of showing the friend’s Principal text (random letters/numbers).",
+        "id": "REQ-19",
+        "summary": "Remove the entire call feature from the backend Motoko canister, including all call-related types, state, and public methods, so the canister interface no longer exposes any call APIs.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-20",
+        "summary": "Remove the entire call feature from the frontend UI and data layer, including the Calls page, the /calls route, call-related React Query hooks, and any navigation entries or icons that link to calls.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/InboxPage.tsx"
+          "frontend/src/pages/CallsPage.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppShell.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/InboxPage.tsx"
+          "frontend/src/pages/CallsPage.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppShell.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
-        "id": "REQ-18",
-        "summary": "Fetch and render friend profile data (displayName, username, profilePicture) for Inbox/Chats entries using existing profile query capabilities, without changing immutable hook files.",
+        "id": "REQ-21",
+        "summary": "Rename the app to “MessageCenter” in user-facing branding locations (e.g., header title and browser tab title) so the UI consistently shows the new app name.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useInboxFriendProfiles.ts",
-          "frontend/src/pages/InboxPage.tsx"
+          "frontend/src/components/layout/AppShell.tsx",
+          "frontend/index.html"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useInboxFriendProfiles.ts",
-          "frontend/src/pages/InboxPage.tsx"
+          "frontend/src/components/layout/AppShell.tsx",
+          "frontend/index.html"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/hooks/useInboxFriendProfiles.ts",
-    "frontend/src/pages/InboxPage.tsx",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/layout/AppShell.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/CallsPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

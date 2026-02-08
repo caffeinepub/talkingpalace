@@ -10,19 +10,6 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface Call {
-  'id' : bigint,
-  'startTime' : Time,
-  'status' : CallStatus,
-  'endTime' : [] | [Time],
-  'caller' : Principal,
-  'receiver' : Principal,
-}
-export type CallStatus = { 'pending' : null } |
-  { 'missed' : null } |
-  { 'ended' : null } |
-  { 'accepted' : null } |
-  { 'declined' : null };
 export type ExternalBlob = Uint8Array;
 export interface Friend { 'principal' : Principal, 'isBestFriend' : boolean }
 export interface Message {
@@ -86,14 +73,12 @@ export interface _SERVICE {
     [string, string, string, boolean],
     undefined
   >,
-  'getCallHistory' : ActorMethod<[], Array<Call>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getFriendsList' : ActorMethod<[], Array<Friend>>,
   'getMessagesWithUser' : ActorMethod<[Principal], Array<Message>>,
   'getProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'initiateCall' : ActorMethod<[Principal], bigint>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'removeFriend' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
@@ -103,7 +88,6 @@ export interface _SERVICE {
     undefined
   >,
   'toggleBestFriend' : ActorMethod<[Principal], undefined>,
-  'updateCallStatus' : ActorMethod<[bigint, CallStatus], undefined>,
   'updateProfilePicture' : ActorMethod<[ExternalBlob], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

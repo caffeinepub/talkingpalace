@@ -24,22 +24,6 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const Time = IDL.Int;
-export const CallStatus = IDL.Variant({
-  'pending' : IDL.Null,
-  'missed' : IDL.Null,
-  'ended' : IDL.Null,
-  'accepted' : IDL.Null,
-  'declined' : IDL.Null,
-});
-export const Call = IDL.Record({
-  'id' : IDL.Nat,
-  'startTime' : Time,
-  'status' : CallStatus,
-  'endTime' : IDL.Opt(Time),
-  'caller' : IDL.Principal,
-  'receiver' : IDL.Principal,
-});
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const UserProfile = IDL.Record({
   'principal' : IDL.Principal,
@@ -53,6 +37,7 @@ export const Friend = IDL.Record({
   'principal' : IDL.Principal,
   'isBestFriend' : IDL.Bool,
 });
+export const Time = IDL.Int;
 export const Message = IDL.Record({
   'id' : IDL.Nat,
   'content' : IDL.Text,
@@ -104,7 +89,6 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
-  'getCallHistory' : IDL.Func([], [IDL.Vec(Call)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getFriendsList' : IDL.Func([], [IDL.Vec(Friend)], ['query']),
@@ -119,7 +103,6 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
-  'initiateCall' : IDL.Func([IDL.Principal], [IDL.Nat], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'removeFriend' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
@@ -130,7 +113,6 @@ export const idlService = IDL.Service({
       [],
     ),
   'toggleBestFriend' : IDL.Func([IDL.Principal], [], []),
-  'updateCallStatus' : IDL.Func([IDL.Nat, CallStatus], [], []),
   'updateProfilePicture' : IDL.Func([ExternalBlob], [], []),
 });
 
@@ -153,22 +135,6 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const Time = IDL.Int;
-  const CallStatus = IDL.Variant({
-    'pending' : IDL.Null,
-    'missed' : IDL.Null,
-    'ended' : IDL.Null,
-    'accepted' : IDL.Null,
-    'declined' : IDL.Null,
-  });
-  const Call = IDL.Record({
-    'id' : IDL.Nat,
-    'startTime' : Time,
-    'status' : CallStatus,
-    'endTime' : IDL.Opt(Time),
-    'caller' : IDL.Principal,
-    'receiver' : IDL.Principal,
-  });
   const ExternalBlob = IDL.Vec(IDL.Nat8);
   const UserProfile = IDL.Record({
     'principal' : IDL.Principal,
@@ -182,6 +148,7 @@ export const idlFactory = ({ IDL }) => {
     'principal' : IDL.Principal,
     'isBestFriend' : IDL.Bool,
   });
+  const Time = IDL.Int;
   const Message = IDL.Record({
     'id' : IDL.Nat,
     'content' : IDL.Text,
@@ -233,7 +200,6 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
-    'getCallHistory' : IDL.Func([], [IDL.Vec(Call)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getFriendsList' : IDL.Func([], [IDL.Vec(Friend)], ['query']),
@@ -248,7 +214,6 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
-    'initiateCall' : IDL.Func([IDL.Principal], [IDL.Nat], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'removeFriend' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
@@ -259,7 +224,6 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'toggleBestFriend' : IDL.Func([IDL.Principal], [], []),
-    'updateCallStatus' : IDL.Func([IDL.Nat, CallStatus], [], []),
     'updateProfilePicture' : IDL.Func([ExternalBlob], [], []),
   });
 };

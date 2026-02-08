@@ -3,7 +3,7 @@ import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGetCallerUserProfile } from '../../hooks/useCurrentUserProfile';
-import { MessageSquare, Phone, Users, User, Settings, LogOut } from 'lucide-react';
+import { MessageSquare, Users, User, Settings, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -34,7 +34,6 @@ export default function AppShell({ children }: AppShellProps) {
 
   const navItems = [
     { path: '/', icon: MessageSquare, label: 'Chats' },
-    { path: '/calls', icon: Phone, label: 'Calls' },
     { path: '/friends', icon: Users, label: 'Friends' },
   ];
 
@@ -45,7 +44,7 @@ export default function AppShell({ children }: AppShellProps) {
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <img src="/assets/generated/app-logo.dim_512x512.png" alt="Logo" className="w-8 h-8" />
-            <h1 className="text-xl font-bold">Connect</h1>
+            <h1 className="text-xl font-bold">MessageCenter</h1>
           </div>
 
           <DropdownMenu>

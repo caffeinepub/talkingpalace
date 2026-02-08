@@ -5,7 +5,6 @@ import { ThemeProvider } from './theme/ThemeProvider';
 import SignInPage from './pages/SignInPage';
 import InboxPage from './pages/InboxPage';
 import ChatDetailPage from './pages/ChatDetailPage';
-import CallsPage from './pages/CallsPage';
 import FriendsPage from './pages/FriendsPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
@@ -52,12 +51,6 @@ const chatRoute = createRoute({
   component: ChatDetailPage,
 });
 
-const callsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/calls',
-  component: CallsPage,
-});
-
 const friendsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/friends',
@@ -79,7 +72,6 @@ const settingsRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   chatRoute,
-  callsRoute,
   friendsRoute,
   profileRoute,
   settingsRoute,

@@ -1,52 +1,84 @@
 {
   "kind": "build_request",
-  "title": "Fix chat UI to show friend display names instead of Principal IDs",
+  "title": "Remove call feature and rename app to MessageCenter",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-17",
-      "text": "Update the Inbox/Chats list to display each friend’s displayName (and username) instead of showing the friend’s Principal text (random letters/numbers).",
-      "target": "frontend",
+      "id": "REQ-19",
+      "text": "Remove the entire call feature from the backend Motoko canister, including all call-related types, state, and public methods, so the canister interface no longer exposes any call APIs.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages-7",
+          "recent-messages-9",
+          "recent-messages-11"
         ],
         "quotes": [
-          "whenever I go to chat with someone, instead of showing their displayname, it just shows random letters and numbers. please fix that."
+          "remove the call feature since we cant have real calls.",
+          "Just confirm: do you want **everything related to calls fully removed** from both backend and frontend?",
+          "yes"
         ]
       },
       "acceptanceCriteria": [
-        "On the Inbox page, each chat entry renders the friend’s displayName when the friend profile is available.",
-        "If the friend profile is not yet loaded, the UI shows a sensible placeholder (e.g., \"Loading…\") rather than the Principal text.",
-        "If the friend profile cannot be found, the UI falls back gracefully (e.g., \"Unknown user\") and does not show raw Principal IDs as the primary label."
+        "backend/main.mo no longer defines CallStatus or Call types.",
+        "backend/main.mo no longer keeps call-related state (e.g., calls map, nextCallId).",
+        "backend/main.mo no longer exposes initiateCall, updateCallStatus, or getCallHistory.",
+        "The generated Candid/TypeScript declarations no longer include call types or call methods, and the project compiles."
       ]
     },
     {
-      "id": "REQ-18",
-      "text": "Fetch and render friend profile data (displayName, username, profilePicture) for Inbox/Chats entries using existing profile query capabilities, without changing immutable hook files.",
+      "id": "REQ-20",
+      "text": "Remove the entire call feature from the frontend UI and data layer, including the Calls page, the /calls route, call-related React Query hooks, and any navigation entries or icons that link to calls.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages-7",
+          "recent-messages-9",
+          "recent-messages-11"
         ],
         "quotes": [
-          "instead of showing their displayname, it just shows random letters and numbers"
+          "remove the call feature since we cant have real calls.",
+          "Just confirm: do you want **everything related to calls fully removed** from both backend and frontend?",
+          "yes"
         ]
       },
       "acceptanceCriteria": [
-        "Inbox page chat entries show the friend’s avatar using the existing Avatar component with the fetched UserProfile (profilePicture when available, otherwise default avatar).",
-        "Friend profile lookups are performed via existing frontend query patterns (React Query) and do not require editing files under frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-        "Navigating into a chat from the Inbox still routes to /chat/$userId with the friend’s Principal text as the route param, but the visible label in the list is the friend’s displayName."
+        "frontend/src/pages/CallsPage.tsx is removed or no longer referenced anywhere in the app build.",
+        "frontend/src/App.tsx no longer imports CallsPage and no longer defines a /calls route.",
+        "frontend/src/components/layout/AppShell.tsx bottom navigation no longer shows a “Calls” tab and does not navigate to /calls.",
+        "frontend/src/hooks/useQueries.ts no longer exports useGetCallHistory, useInitiateCall, or useUpdateCallStatus, and there are no remaining call-related imports (Call, CallStatus).",
+        "The frontend builds and runs without referencing call features."
+      ]
+    },
+    {
+      "id": "REQ-21",
+      "text": "Rename the app to “MessageCenter” in user-facing branding locations (e.g., header title and browser tab title) so the UI consistently shows the new app name.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages-10",
+          "recent-messages-11"
+        ],
+        "quotes": [
+          "and rename the app to MessageCenter",
+          "yes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The top-bar app name displayed in the UI is “MessageCenter” (replacing the current “Connect”).",
+        "frontend/index.html <title> is updated to “MessageCenter”.",
+        "No remaining user-facing strings refer to the old app name(s) (e.g., “Connect”, “TalkingPalace”) in primary branding locations."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend immutablePaths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
-    "Keep the backend as a single Motoko actor; do not introduce additional backend services."
+    "Backend must remain a single Motoko actor in backend/main.mo; do not introduce additional backend services.",
+    "Do not edit files under frontend/src/components/ui or any paths listed in SYSTEM_CONTEXT.frontend.immutablePaths; compose existing UI components instead.",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Do not change the underlying friends list backend schema or add new backend endpoints unless strictly necessary to fix the display-name issue.",
-    "Do not implement group chats or additional messaging features beyond fixing the displayed name/identity in chat lists."
+    "Implementing real-time voice/video calling, WebRTC calling, or any other live call functionality.",
+    "Adding new communication features beyond removing calls and renaming the app."
   ],
   "imageRequirements": {
     "required": [],
@@ -59,7 +91,10 @@
     "preferencesToRemove": [],
     "miscToAdd": [],
     "miscToRemove": [],
-    "fieldsToSet": {},
+    "fieldsToSet": {
+      "projectName": "MessageCenter",
+      "summary": "Build MessageCenter, a social communication app with messaging, video creation/sharing, video ratings, customizable profiles, theming (including dark/light mode), and a friends/best-friends list."
+    },
     "fieldsToDelete": []
   }
 }
